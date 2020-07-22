@@ -15,5 +15,5 @@ public class ChessDriver
       Tae.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
       Tae.setVisible(true);
    }
-   
+   //hehe
 }
