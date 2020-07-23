@@ -1,3 +1,4 @@
+import javax.lang.model.util.ElementScanner6;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
@@ -243,9 +244,33 @@ public class Chess extends JPanel {
                } 
             }
             
-            else if (living[rsel][csel].getType() == 3) // white knight
-            {
-               if (living[rsel][csel].canMove(row, col) && occupied[row][col] != 1 && (row!=bkr || col!=bkc))
+            else if (living[rsel][csel].getType() == 3){ // white knight
+               pieces temp;
+               if (occupied[row][col] != 0) temp = living[row][col];
+               else temp = null;
+
+               move(row, col, rsel, csel);
+               if (WhiteInCheck(wkr, wkc)&&turn){
+                  //RESET THE OLD SPACE
+                  living[row][col].setLocation(rsel, csel);
+                  living[rsel][csel] = living[row][col];
+                  occupied[rsel][csel] = living[rsel][csel].getColor();
+                  board[rsel][csel].setIcon(board[row][col].getIcon());
+                  //RESET THE CAPTURED SPACE
+                  if (temp == null){
+                     living[row][col] = null;
+                     occupied[row][col] = 0;
+                     board[row][col].setIcon(null);
+                  }
+                  else{
+                     living[row][col] = temp;
+                     occupied[row][col] = temp.getColor();
+                     board[row][col].setIcon(imageArray[temp.getType()-1]);
+                  }
+               }
+               else  
+                  turn = !turn;
+               /*if (living[rsel][csel].canMove(row, col) && occupied[row][col] != 1 && (row!=bkr || col!=bkc))
                {
 
                   
@@ -254,7 +279,7 @@ public class Chess extends JPanel {
                   }
                   else if (WIC && WhichPieceIsCheckingWhite(wkr, wkc).getType() != 4)//////for white
                   {
-                     if (living[row][col] == WhichPieceIsCheckingWhite(wkr, wkc) || BlockACheck(wkr, wkc, WhichPieceIsCheckingWhite(wkr, wkc).getRow(),  WhichPieceIsCheckingWhite(wkr, wkc).getCol(), row, col))/*:)*/
+                     if (living[row][col] == WhichPieceIsCheckingWhite(wkr, wkc) || BlockACheck(wkr, wkc, WhichPieceIsCheckingWhite(wkr, wkc).getRow(),  WhichPieceIsCheckingWhite(wkr, wkc).getCol(), row, col))/*:)
                      {
                         move(row, col, rsel, csel);
                         turn = !turn;
@@ -262,7 +287,7 @@ public class Chess extends JPanel {
                   }
                   else if (WIC && WhichPieceIsCheckingWhite(wkr, wkc).getType() == 4)
                   {
-                     if (living[row][col] == WhichPieceIsCheckingWhite(wkr, wkc))/*:)*/
+                     if (living[row][col] == WhichPieceIsCheckingWhite(wkr, wkc))/*:)
                      {
                         move(row, col, rsel, csel);
                         turn = !turn;
@@ -297,7 +322,7 @@ public class Chess extends JPanel {
                         }
                         turn = !turn;
                   } /////// for white
-               }
+               }*/
             }
             
             else if (living[rsel][csel].getType() == 4) // black knight
