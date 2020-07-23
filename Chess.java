@@ -1,7 +1,7 @@
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-
+//hehe clean
 public class Chess extends JPanel
 {
    private JButton[][]Board = new JButton[8][8];
