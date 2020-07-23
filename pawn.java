@@ -1,42 +1,36 @@
-public class pawn implements pieces
-{
+public class pawn implements pieces{
+
    private int row, col, color, type;
-   public pawn(int r, int c, int t, int q)
-   {
+
+   public pawn(int r, int c, int t, int q){
       row = r;
       col = c;
       color = t;
       type = q;
    }
    
-   public void  setLocation(int r, int c)
-   {
+   public void  setLocation(int r, int c){
       row = r;
       col = c;
    }
    
-   public int getType()
-   {
+   public int getType(){
       return type;
    }
    
-   public int getColor()
-   {
+   public int getColor(){
       return color;
    }
    
-   public int getRow()
-   {
+   public int getRow(){
       return row;
    }
    
-   public int getCol()
-   {
+   public int getCol(){
       return col;
    }
    
-   public boolean canCapture(int r, int c)
-   {
+   public boolean canCapture(int r, int c){
       if (r == getRow() && c == getCol()) return false;
 
       if (color == 2){
@@ -50,8 +44,7 @@ public class pawn implements pieces
       return false;
    }
    
-   public boolean canMove(int r, int c)
-   {
+   public boolean canMove(int r, int c){
       if (r == getRow() && c == getCol()) return false;
 
       if (color == 2){
