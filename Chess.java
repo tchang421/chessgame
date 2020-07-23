@@ -146,7 +146,7 @@ public class Chess extends JPanel
                else if (c == 1 || c == 6) // black knight
                {
                   Board[r][c].setIcon(bk);
-                  living[r][c] = new Bknight(r, c, occupied[r][c], 4);
+                  living[r][c] = new knight(r, c, occupied[r][c], 4);
                }
                else if (c == 2 || c == 5)
                {
@@ -174,7 +174,7 @@ public class Chess extends JPanel
                else if (c == 1 || c == 6) // White knight
                {
                   Board[r][c].setIcon(wk);
-                  living[r][c] = new Wknight(r, c, occupied[r][c], 3);
+                  living[r][c] = new knight(r, c, occupied[r][c], 3);
                }
                else if (c == 2 || c == 5)
                {
@@ -271,7 +271,7 @@ public class Chess extends JPanel
          {
             selected = false;
             Board[rsel][csel].setBackground(previous); // stack overflow
-            if (living[rsel][csel].getType() == 1 && living[rsel][csel].getColor() == 1) // White Pawns
+            if (living[rsel][csel].getType() == 1) // White Pawns
             {
 /*capturing*/  if (occupied[row][col] == 2 && living[rsel][csel].canCapture(row, col) && NoPieceBetween(row, col, rsel, csel) && (row!=bkr || col!=bkc))
                {
@@ -427,7 +427,7 @@ public class Chess extends JPanel
                } 
             }
             
-            else if (living[rsel][csel].getType() == 2  && living[rsel][csel].getColor() == 2) // black pawns
+            else if (living[rsel][csel].getType() == 2) // black pawns
             {
                if (occupied[row][col] == 1 && living[rsel][csel].canCapture(row, col) && NoPieceBetween(row, col, rsel, csel)&& (row!=wkr || col!=wkc))
                {
