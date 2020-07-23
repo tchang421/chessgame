@@ -7,9 +7,24 @@ import java.awt.event.*;
 VARIABLES
 bkr - black king row
 occupied[][] - array of ints (0: unoccupied, 1: whte piece, 2: black piece)
-x - alternates for setting the color of the board
-///////////////////////////////////////
+living[][] - array of piece objects
 
+///////////////////////////////////////
+when dealing with colors - 1 is white, 2 is black
+
+TYPES
+1 - wp
+2 - bp
+3 - wk
+4 - bk
+5 - wb
+6 - bb
+7 - wr
+8 - br
+9 - wq
+10 - bq
+11 - wking
+12 - bking
 
 
 */
@@ -103,23 +118,6 @@ public class Chess extends JPanel
       {
          for(int c = 0; c<8; c++)
          { 
-            
-            /*Board[r][c] = new JButton();
-            if (x == -1)
-            {
-               Board[r][c].setBackground(Color.gray); // stack overflow
-               if (c != 7)
-                  x = x* -1;
-            }
-            else
-            {
-               Board[r][c].setBackground(Color.white);// stack overflow
-               if (c != 7)
-                  x = x* -1;
-            }
-            Board[r][c].setOpaque(true);// stack overflow
-            Board[r][c].setBorderPainted(false); // stack overflow
-            */
             add(Board[r][c]);  
             previous = Board[0][0].getBackground();//stackoverflow
             previous3 = Color.gray;
@@ -127,17 +125,16 @@ public class Chess extends JPanel
             
             Board[r][c].addActionListener(new PieceSelected(r, c));
             
-            
             // instantiates Icons and piece objects
             if (r == 1)
             {
                Board[r][c].setIcon(bp);
-               living[r][c] = new Bpawn(r, c, occupied[r][c], 2);
+               living[r][c] = new pawn(r, c, occupied[r][c], 2);
                            }
             else if (r == 6)
             {
                Board[r][c].setIcon(wp);
-               living[r][c] = new Wpawn(r, c, occupied[r][c], 1);
+               living[r][c] = new pawn(r, c, occupied[r][c], 1);
             }
             else if (r == 0)
             {
@@ -274,7 +271,7 @@ public class Chess extends JPanel
          {
             selected = false;
             Board[rsel][csel].setBackground(previous); // stack overflow
-            if (living[rsel][csel].getType() == 1) // White Pawns
+            if (living[rsel][csel].getType() == 1 && living[rsel][csel].getColor() == 1) // White Pawns
             {
 /*capturing*/  if (occupied[row][col] == 2 && living[rsel][csel].canCapture(row, col) && NoPieceBetween(row, col, rsel, csel) && (row!=bkr || col!=bkc))
                {
@@ -430,7 +427,7 @@ public class Chess extends JPanel
                } 
             }
             
-            else if (living[rsel][csel].getType() == 2) // black pawns
+            else if (living[rsel][csel].getType() == 2  && living[rsel][csel].getColor() == 2) // black pawns
             {
                if (occupied[row][col] == 1 && living[rsel][csel].canCapture(row, col) && NoPieceBetween(row, col, rsel, csel)&& (row!=wkr || col!=wkc))
                {
