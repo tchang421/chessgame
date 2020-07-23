@@ -25,13 +25,10 @@ TYPES
 10 - bq
 11 - wking
 12 - bking
-
-
 */
 
-public class Chess extends JPanel
-{
-   private JButton[][]Board = new JButton[8][8];
+public class Chess extends JPanel {
+   private JButton[][]board = new JButton[8][8];
    private int[][]occupied = new int[8][8]; //0-none, 1-white, 2-black
    private ImageIcon bb, wb, bp, wp, bk, wk, br, wr, bK, wK, bq, wq;
    private boolean selected;
@@ -43,13 +40,11 @@ public class Chess extends JPanel
    private boolean turn, captured; // true - white
    private boolean WIC, BIC, WKORM, BKORM;
    private JButton exit;
-   private JPanel BigBoard;
+   private JPanel bigBoard;
 
    public static void setBoard(int[][] oc, JButton[][] b){
-      for(int r = 0; r<8; r++)
-      {
-         for(int c = 0; c<8; c++)
-         { 
+      for(int r = 0; r<8; r++){
+         for(int c = 0; c<8; c++){ 
             // SETS THE BOARD OCCPUATION
             if (r<2)
                oc[r][c] = 2;
@@ -66,16 +61,71 @@ public class Chess extends JPanel
                b[r][c].setBackground(Color.gray);
             b[r][c].setOpaque(true);// stack overflow
             b[r][c].setBorderPainted(false); // stack overflow
+         }
+      }
+   }
+   /*
+         imageArray[0] = new ImageIcon("WPawn.PNG");
+      imageArray[1] = new ImageIcon("BPawn.PNG");
+      imageArray[2] = new ImageIcon("WKnight.PNG");
+      imageArray[3] = new ImageIcon("Bknight.PNG");
+      imageArray[4] = new ImageIcon("WBishop.PNG");
+      imageArray[5] = new ImageIcon("BBishop.PNG");
+      imageArray[6] = new ImageIcon("WRook.PNG");
+      imageArray[7] = new ImageIcon("BRook.PNG");
+      imageArray[8] = new ImageIcon("WQueen.PNG");
+      imageArray[9] = new ImageIcon("BQueen.PNG");
+      imageArray[10] = new ImageIcon("WKing.PNG");
+      imageArray[11] = new ImageIcon("BKing.PNG");
 
+      b[r][c].setIcon(i[1]);
+   */
+
+   public static void setPieces(JButton[][]b, int[][]o, pieces[][]l, ImageIcon[]i){
+      for (int r = 0; r < 8; r++){
+         for (int c = 0; c < 8; c++){
+            if (r == 1) //BLACK PAWN
+               l[r][c] = new pawn(r, c, o[r][c], 2);
+            else if (r == 6) //WHITE PAWN
+               l[r][c] = new pawn(r, c, o[r][c], 1);
+            else if (r == 0){
+               if (c == 0 || c == 7) //BLACK ROOK
+                  l[r][c] = new rook(r, c, o[r][c], 8);
+               else if (c == 1 || c == 6) //BLACK KNIGHT
+                  l[r][c] = new knight(r, c, o[r][c], 4);
+               else if (c == 2 || c == 5) //BLACK BISHOP
+                  l[r][c] = new bishop(r, c, o[r][c], 6);
+               else if (c == 4) //BLACK KING
+                  l[r][c] = new king(r, c, o[r][c], 12);
+               else  //BLACK QUEEN
+                  l[r][c] = new queen(r, c, o[r][c], 10);
+            }
+            else if (r == 7){
+               if (c == 0 || c == 7) // WHITE ROOK
+                  l[r][c] = new rook(r, c, o[r][c], 7);
+               else if (c == 1 || c == 6) //WHITE KNIGHT
+                  l[r][c] = new knight(r, c, o[r][c], 3);
+               else if (c == 2 || c == 5) //WHITE BISHOP
+                  l[r][c] = new bishop(r, c, o[r][c], 5);
+               else if (c == 4) //WHITE KING
+                  l[r][c] = new king(r, c, o[r][c], 11);
+               else //WHITE QUEEN
+                  l[r][c] = new queen(r, c, o[r][c], 9);
+            }
+         }
+      }
+      for (int r = 0; r < 8; r++){
+         for (int c = 0; c < 8; c++){
+            if (l[r][c] != null)
+               b[r][c].setIcon(i[l[r][c].getType()-1]);
          }
       }
    }
  
-   public Chess()
-   { 
+   public Chess(){ 
       setLayout(new BorderLayout());
-      BigBoard = new JPanel();
-      BigBoard.setLayout(new GridLayout(8, 8));
+      bigBoard = new JPanel();
+      bigBoard.setLayout(new GridLayout(8, 8));
       WKORM = false;
       BKORM = false;
       bcheckc = 0;
@@ -94,7 +144,22 @@ public class Chess extends JPanel
       add(exit, BorderLayout.SOUTH);
       rsel = 0;
       csel = 0;
-      int x = 1;
+      //TESTING THIS
+      ImageIcon [] imageArray = new ImageIcon[12];
+      imageArray[0] = new ImageIcon("WPawn.PNG");
+      imageArray[1] = new ImageIcon("BPawn.PNG");
+      imageArray[2] = new ImageIcon("WKnight.PNG");
+      imageArray[3] = new ImageIcon("Bknight.PNG");
+      imageArray[4] = new ImageIcon("WBishop.PNG");
+      imageArray[5] = new ImageIcon("BBishop.PNG");
+      imageArray[6] = new ImageIcon("WRook.PNG");
+      imageArray[7] = new ImageIcon("BRook.PNG");
+      imageArray[8] = new ImageIcon("WQueen.PNG");
+      imageArray[9] = new ImageIcon("BQueen.PNG");
+      imageArray[10] = new ImageIcon("WKing.PNG");
+      imageArray[11] = new ImageIcon("BKing.PNG");
+      //
+
       wb = new ImageIcon("WBishop.PNG");
       bb = new ImageIcon("BBishop.PNG");
       bp = new ImageIcon("BPawn.PNG");
@@ -113,89 +178,24 @@ public class Chess extends JPanel
       wkc = 4;
       wkr = 7;
         
-      setBoard(occupied, Board);
-      for(int r = 0; r<8; r++)
-      {
-         for(int c = 0; c<8; c++)
-         { 
-            add(Board[r][c]);  
-            previous = Board[0][0].getBackground();//stackoverflow
+      setBoard(occupied, board);
+      for(int r = 0; r<8; r++){
+         for(int c = 0; c<8; c++){ 
+            add(board[r][c]);  
+            previous = board[0][0].getBackground();//stackoverflow
             previous3 = Color.gray;
-            previous2 = Board[0][0].getBackground();
+            previous2 = board[0][0].getBackground();
             
-            Board[r][c].addActionListener(new PieceSelected(r, c));
+            board[r][c].addActionListener(new PieceSelected(r, c));
             
+            setPieces(board, occupied, living, imageArray);
             // instantiates Icons and piece objects
-            if (r == 1)
-            {
-               Board[r][c].setIcon(bp);
-               living[r][c] = new pawn(r, c, occupied[r][c], 2);
-                           }
-            else if (r == 6)
-            {
-               Board[r][c].setIcon(wp);
-               living[r][c] = new pawn(r, c, occupied[r][c], 1);
-            }
-            else if (r == 0)
-            {
-               if (c == 0 || c == 7)
-               {
-                  Board[r][c].setIcon(br);
-                  living[r][c] = new Brook(r, c, occupied[r][c], 8);
-               }
-               else if (c == 1 || c == 6) // black knight
-               {
-                  Board[r][c].setIcon(bk);
-                  living[r][c] = new knight(r, c, occupied[r][c], 4);
-               }
-               else if (c == 2 || c == 5)
-               {
-                  Board[r][c].setIcon(bb);
-                  living[r][c] = new bishop(r, c, occupied[r][c], 6);
-               }
-               else if (c == 4)
-               {
-                  Board[r][c].setIcon(bK);
-                  living[r][c] = new king(r, c, occupied[r][c], 12);
-               }
-               else 
-               {
-                  Board[r][c].setIcon(bq);
-                  living[r][c] = new queen(r, c, occupied[r][c], 10);
-               }
-            }
-            else if (r == 7)
-            {
-               if (c == 0 || c == 7)
-               {
-                  Board[r][c].setIcon(wr);
-                  living[r][c] = new Wrook(r, c, occupied[r][c], 7);
-               }
-               else if (c == 1 || c == 6) // White knight
-               {
-                  Board[r][c].setIcon(wk);
-                  living[r][c] = new knight(r, c, occupied[r][c], 3);
-               }
-               else if (c == 2 || c == 5)
-               {
-                  Board[r][c].setIcon(wb);
-                  living[r][c] = new bishop(r, c, occupied[r][c], 5);
-               }
-               else if (c == 4)
-               {
-                  Board[r][c].setIcon(wK);
-                  living[r][c] = new king(r, c, occupied[r][c], 11);
-               }
-               else 
-               {
-                  Board[r][c].setIcon(wq);
-                  living[r][c] = new queen(r, c, occupied[r][c], 9);
-               }
-            }
-          BigBoard.add(Board[r][c]);
+
+            
+          bigBoard.add(board[r][c]);
          }
       }
-      add(BigBoard, BorderLayout.CENTER);
+      add(bigBoard, BorderLayout.CENTER);
    }   
       
    
@@ -253,8 +253,8 @@ public class Chess extends JPanel
                selected = true;
                rsel = row;
                csel = col;
-               previous = Board[row][col].getBackground();
-               Board[row][col].setBackground(Color.yellow); // stack overflow
+               previous = board[row][col].getBackground();
+               board[row][col].setBackground(Color.yellow); // stack overflow
             }
             captured = false;
          }
@@ -262,7 +262,7 @@ public class Chess extends JPanel
          else if (selected && rsel == row && csel == col)   //unhighlight
          {
             selected = false;
-            Board[rsel][csel].setBackground(previous);
+            board[rsel][csel].setBackground(previous);
             captured = false;
          }
          
@@ -270,7 +270,7 @@ public class Chess extends JPanel
          else// moves or captures ////////////////////
          {
             selected = false;
-            Board[rsel][csel].setBackground(previous); // stack overflow
+            board[rsel][csel].setBackground(previous); // stack overflow
             if (living[rsel][csel].getType() == 1) // White Pawns
             {
 /*capturing*/  if (occupied[row][col] == 2 && living[rsel][csel].canCapture(row, col) && NoPieceBetween(row, col, rsel, csel) && (row!=bkr || col!=bkc))
@@ -294,7 +294,7 @@ public class Chess extends JPanel
                         {
                            living[row][col] = null;
                            living[row][col] = new  queen(row, col, 1, 9);
-                           Board[row][col].setIcon(wq);
+                           board[row][col].setIcon(wq);
                         }
                      }
                   }
@@ -326,7 +326,7 @@ public class Chess extends JPanel
                         {
                            living[row][col] = null;
                            living[row][col] = new  queen(row, col, 1, 9);
-                           Board[row][col].setIcon(wq);
+                           board[row][col].setIcon(wq);
             
                         }
                            }
@@ -339,7 +339,7 @@ public class Chess extends JPanel
                         {
                            living[row][col] = null;
                            living[row][col] = new  queen(row, col, 1, 9);
-                           Board[row][col].setIcon(wq);
+                           board[row][col].setIcon(wq);
             
                         }
                         }
@@ -369,7 +369,7 @@ public class Chess extends JPanel
                         {
                            living[row][col] = null;
                            living[row][col] = new  queen(row, col, 1, 9);
-                           Board[row][col].setIcon(wq);
+                           board[row][col].setIcon(wq);
             
                         }
                         
@@ -404,7 +404,7 @@ public class Chess extends JPanel
                         {
                            living[row][col] = null;
                            living[row][col] = new  queen(row, col, 1, 9);
-                           Board[row][col].setIcon(wq);
+                           board[row][col].setIcon(wq);
             
                         }
                            }
@@ -417,7 +417,7 @@ public class Chess extends JPanel
                         {
                            living[row][col] = null;
                            living[row][col] = new  queen(row, col, 1, 9);
-                           Board[row][col].setIcon(wq);
+                           board[row][col].setIcon(wq);
             
                         }
                         }
@@ -450,7 +450,7 @@ public class Chess extends JPanel
                         {
                            living[row][col] = null;
                            living[row][col] = new  queen(row, col,2, 10);
-                           Board[row][col].setIcon(bq);
+                           board[row][col].setIcon(bq);
             
                         }
                      }                    
@@ -482,7 +482,7 @@ public class Chess extends JPanel
                         {
                            living[row][col] = null;
                            living[row][col] = new  queen(row, col,2, 10);
-                           Board[row][col].setIcon(bq);
+                           board[row][col].setIcon(bq);
             
                         }
                            }
@@ -495,7 +495,7 @@ public class Chess extends JPanel
                         {
                            living[row][col] = null;
                            living[row][col] = new  queen(row, col,2, 10);
-                           Board[row][col].setIcon(bq);
+                           board[row][col].setIcon(bq);
             
                         } 
                         }
@@ -523,7 +523,7 @@ public class Chess extends JPanel
                         {
                            living[row][col] = null;
                            living[row][col] = new  queen(row, col,2, 10);
-                           Board[row][col].setIcon(bq);
+                           board[row][col].setIcon(bq);
             
                         }
                      }
@@ -555,7 +555,7 @@ public class Chess extends JPanel
                         {
                            living[row][col] = null;
                            living[row][col] = new  queen(row, col,2, 10);
-                           Board[row][col].setIcon(bq);
+                           board[row][col].setIcon(bq);
             
                         }
                            }
@@ -568,7 +568,7 @@ public class Chess extends JPanel
                         {
                            living[row][col] = null;
                            living[row][col] = new  queen(row, col,2, 10);
-                           Board[row][col].setIcon(bq);
+                           board[row][col].setIcon(bq);
             
                         }
                         }
@@ -1187,31 +1187,31 @@ public class Chess extends JPanel
             //////////////////////////////////////////////////////////////////
             if (BlackInCheck(bkr, bkc))
             {
-               if (Board[bkr][bkc].getBackground() != Color.red)
-               previous2 = Board[bkr][bkc].getBackground();
-               Board[bkr][bkc].setBackground(Color.red);
+               if (board[bkr][bkc].getBackground() != Color.red)
+               previous2 = board[bkr][bkc].getBackground();
+               board[bkr][bkc].setBackground(Color.red);
                bcheckr =bkr;
                bcheckc = bkc;
             }
             else
             {
-               if (Board[bcheckr][bcheckc].getBackground() == Color.red)
-               Board[bcheckr][bcheckc].setBackground(previous2);
+               if (board[bcheckr][bcheckc].getBackground() == Color.red)
+               board[bcheckr][bcheckc].setBackground(previous2);
             }
             
             if (WhiteInCheck(wkr, wkc))
             {
         
-               if (Board[wkr][wkc].getBackground() != Color.red)
-               previous3 = Board[wkr][wkc].getBackground();
-               Board[wkr][wkc].setBackground(Color.red);
+               if (board[wkr][wkc].getBackground() != Color.red)
+               previous3 = board[wkr][wkc].getBackground();
+               board[wkr][wkc].setBackground(Color.red);
                wcheckr = wkr;
                wcheckc = wkc;
             }
             else 
             {
-               if (Board[wcheckr][wcheckc].getBackground() == Color.red)
-               Board[wcheckr][wcheckc].setBackground(previous3);
+               if (board[wcheckr][wcheckc].getBackground() == Color.red)
+               board[wcheckr][wcheckc].setBackground(previous3);
             }   
             
          }
@@ -1223,7 +1223,7 @@ public class Chess extends JPanel
             {
                for (int TAE = 0; TAE < 8; TAE ++)
                {
-                  Board[Tae][TAE].setEnabled(false);
+                  board[Tae][TAE].setEnabled(false);
                }
             }
          }
@@ -1234,7 +1234,7 @@ public class Chess extends JPanel
             {
                for (int TAE = 0; TAE < 8; TAE ++)
                {
-                  Board[Tae][TAE].setEnabled(false);
+                  board[Tae][TAE].setEnabled(false);
                }
             }
          }
@@ -1418,8 +1418,8 @@ public class Chess extends JPanel
       living[rsel][csel] = null;
       occupied[rsel][csel] = 0;
       occupied[row][col] = living[row][col].getColor();
-      Board[row][col].setIcon(Board[rsel][csel].getIcon());
-      Board[rsel][csel].setIcon(null);
+      board[row][col].setIcon(board[rsel][csel].getIcon());
+      board[rsel][csel].setIcon(null);
    }
    
    
