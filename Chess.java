@@ -24,7 +24,7 @@ public class Chess extends JPanel {
    int bkr, bkc, wkr, wkc; // black king's position
    Color previous, previous2, previous3;
    private pieces[][]living = new pieces[8][8]; // active pieces
-   private boolean turn, captured; // true - white
+   private boolean turn; // true - white
    private boolean WIC, BIC, WKORM, BKORM;
    private JButton exit;
    private JPanel bigBoard;
@@ -99,8 +99,7 @@ public class Chess extends JPanel {
       bcheckr = 0;
       wcheckc = 0;
       wcheckr = 0;
-      captured = false;
-      
+
       selected = false;
       turn = true;
       
@@ -175,24 +174,26 @@ public class Chess extends JPanel {
                previous = board[row][col].getBackground();
                board[row][col].setBackground(Color.yellow); 
             }
-            captured = false;
          }
          else if (selected && rsel == row && csel == col){ //UNSELECT A PIECE
             selected = false;
             board[rsel][csel].setBackground(previous);
-            captured = false;
          }
-         else{ //MOVES THE SELECTED PIECE
+         else{
+         ///////////////////////////////////////////////////////////////////////
+         ///////////////////////////////////////////////////////////////////////
+         //MOVING THE SELECTED PIECE
+         ///////////////////////////////////////////////////////////////////////
+         ///////////////////////////////////////////////////////////////////////
             selected = false;
             board[rsel][csel].setBackground(previous); 
-            if (living[rsel][csel].getType() == 1){ //WHITE PAWN
-               if (occupied[row][col] == 2 && living[rsel][csel].canCapture(row, col) && 
-                         (row!=bkr || col!=bkc)){ //FOR CAPTURING
-                  captured = true;
+            if (living[rsel][csel].getType() <= 2){ //WHITE PAWN
+               if (occupied[row][col] != occupied[rsel][csel] && living[rsel][csel].canCapture(row, col) 
+                        && (row!=bkr || col!=bkc) && (row!=wkr || col!=wkc)){ //FOR CAPTURING
                   
                   pieces temp = living[row][col];
-                  Capture(row, col, rsel, csel);
-                  if (WhiteInCheck(wkr, wkc)){
+                  move(row, col, rsel, csel);
+                  if (WhiteInCheck(wkr, wkc)&&turn || BlackInCheck(bkr, bkc)&&!turn){
                      //RESET THE OLD SPACE
                      living[row][col].setLocation(rsel, csel);
                      living[rsel][csel] = living[row][col];
@@ -204,255 +205,49 @@ public class Chess extends JPanel {
                      board[row][col].setIcon(imageArray[temp.getType()-1]);
                   }
                   else{
-                     turn = !turn;
-                     if (row == 0){
+                     if (turn && row == 0){
                         living[row][col] = new  queen(row, col, 1, 9);
                         board[row][col].setIcon(imageArray[8]);
                      }
+                     else if (!turn && row == 7){
+                        living[row][col] = new  queen(row, col, 2, 10);
+                        board[row][col].setIcon(imageArray[9]);
+                     }
+                     turn = !turn;
                   }
                }
-/*moving*/     else if (occupied[row][col] == 0 && living[rsel][csel].canMove(row, col))
-               {
-                  if (occupied[row][col] != 0)
-                  {
-                     captured = true;
+/*moving*/     else if (occupied[row][col] == 0 && living[rsel][csel].canMove(row, col)){
+                  move(row, col, rsel, csel);
+                  if (WhiteInCheck(wkr, wkc)&&turn || BlackInCheck(bkr, bkc)&&!turn){
+                     //RESET THE OLD SPACE
+                     living[row][col].setLocation(rsel, csel);
+                     living[rsel][csel] = living[row][col];
+                     occupied[rsel][csel] = living[rsel][csel].getColor();
+                     board[rsel][csel].setIcon(board[row][col].getIcon());
+                     //RESET THE CAPTURED SPACE
+                     living[row][col] = null;
+                     occupied[row][col] = 0;
+                     board[row][col].setIcon(null);
                   }
-                  else
-                  {
-                     captured = false;
-                  }
-                  
-                  if (WIC && WhichPieceIsCheckingWhite(wkr, wkc).getType() != 4 && HowManyCheckingWhite(wkr, wkc) == 1)
-                    {
-                     if (BlockACheck(wkr, wkc, WhichPieceIsCheckingWhite(wkr, wkc).getRow(),  WhichPieceIsCheckingWhite(wkr, wkc).getCol(), row, col))
-                     {
-                      
-                           Capture(row, col, rsel, csel);
-                           turn = !turn;
-                           if (row == 0)
-                        {
-                           living[row][col] = null;
-                           living[row][col] = new  queen(row, col, 1, 9);
-                           board[row][col].setIcon(imageArray[8]);
-            
-                        }
-                        
+                  else{
+                     if (turn && row == 0){
+                        living[row][col] = new  queen(row, col, 1, 9);
+                        board[row][col].setIcon(imageArray[8]);
                      }
-                  }
-                  
-                  else if (WIC && HowManyCheckingWhite(wkr, wkc) == 2)
-                  {
-                  }
-                  else if(!WIC)
-                  {
-                     
-                        occupied[rsel][csel] = 0;
-                        if (WhiteInCheck(wkr, wkc))
-                        {
-                           int hold = occupied[row][col];
-                           occupied[row][col] = 1;
-                           
-                           if(WhiteInCheck(wkr, wkc))
-                           {
-                              occupied[rsel][csel] = 1;
-                              occupied[row][col] = hold;
-                              turn = ! turn;
-                           }
-                           
-                           else 
-                           {
-                              occupied[rsel][csel] = 1;
-                              occupied[row][col] = hold;
-                              Capture(row, col, rsel, csel); 
-                              if (row == 0)
-                        {
-                           living[row][col] = null;
-                           living[row][col] = new  queen(row, col, 1, 9);
-                           board[row][col].setIcon(imageArray[8]);
-            
-                        }
-                           }
-                        }
-                        else
-                        {
-                           occupied[rsel][csel] = 1;
-                           Capture(row, col, rsel, csel); 
-                           if (row == 0)
-                        {
-                           living[row][col] = null;
-                           living[row][col] = new  queen(row, col, 1, 9);
-                           board[row][col].setIcon(imageArray[8]);
-            
-                        }
-                        }
-                        turn = !turn;
-                     
+                     else if (!turn && row == 7){
+                        living[row][col] = new  queen(row, col, 2, 10);
+                        board[row][col].setIcon(imageArray[9]);
+                     }
+                     turn = !turn;
                   }
                } 
-            }
-            
-            else if (living[rsel][csel].getType() == 2) // black pawns
-            {
-               if (occupied[row][col] == 1 && living[rsel][csel].canCapture(row, col) && NoPieceBetween(row, col, rsel, csel)&& (row!=wkr || col!=wkc))
-               {
-                  if (occupied[row][col] != 0)
-                  {
-                     captured = true;
-                  }
-                  else
-                  {
-                     captured = false;
-                  }
-                  
-                  if (BIC && HowManyCheckingBlack(bkr, bkc) == 1)
-                  {
-                     if (living[row][col] == WhichPieceIsCheckingBlack(bkr, bkc))
-                     {
-                        Capture(row, col, rsel, csel); 
-                        turn = !turn;
-                        if (row == 7)
-                        {
-                           living[row][col] = null;
-                           living[row][col] = new  queen(row, col,2, 10);
-                           board[row][col].setIcon(imageArray[9]);
-            
-                        }
-                     }                    
-                  }
-                  else if(BIC && HowManyCheckingBlack(bkr, bkc) == 2)
-                  {
-                  }
-                  else
-                  {
-                        occupied[rsel][csel] = 0;
-                        if (BlackInCheck(bkr, bkc))
-                        {
-                           int hold = occupied[row][col];
-                           occupied[row][col] = 2;
-                           
-                           if(BlackInCheck(bkr, bkc))
-                           {
-                              occupied[rsel][csel] = 2;
-                              occupied[row][col] = hold;
-                              turn = ! turn;
-                           }
-                           
-                           else 
-                           {
-                              occupied[rsel][csel] = 2;
-                              occupied[row][col] = hold;
-                              Capture(row, col, rsel, csel); 
-                              if (row == 7)
-                        {
-                           living[row][col] = null;
-                           living[row][col] = new  queen(row, col,2, 10);
-                           board[row][col].setIcon(imageArray[9]);
-            
-                        }
-                           }
-                        }
-                        else
-                        {
-                           occupied[rsel][csel] = 2;
-                           Capture(row, col, rsel, csel);
-                           if (row == 7)
-                        {
-                           living[row][col] = null;
-                           living[row][col] = new  queen(row, col,2, 10);
-                           board[row][col].setIcon(imageArray[9]);
-            
-                        } 
-                        }
-                        turn = !turn;
-                  }
-               } 
-               else if (occupied[row][col] == 0 && living[rsel][csel].canMove(row, col) && NoPieceBetween(row, col, rsel, csel)&& (row!=wkr || col!=wkc))
-               {
-                  if (occupied[row][col] != 0)
-                  {
-                     captured = true;
-                  }
-                  else
-                  {
-                     captured = false;
-                  }
-                  
-                  if (BIC && WhichPieceIsCheckingBlack(bkr, bkc).getType() != 3 && HowManyCheckingBlack(bkr, bkc) == 1)
-                    {
-                     if (BlockACheck(bkr, bkc, WhichPieceIsCheckingBlack(bkr, bkc).getRow(),  WhichPieceIsCheckingBlack(bkr, bkc).getCol(), row, col))
-                     {
-                        Capture(row, col, rsel, csel); 
-                        turn = !turn;
-                        if (row == 7)
-                        {
-                           living[row][col] = null;
-                           living[row][col] = new  queen(row, col,2, 10);
-                           board[row][col].setIcon(imageArray[9]);
-            
-                        }
-                     }
-                  }
-                  else if(BIC && HowManyCheckingBlack(bkr, bkc) == 2)
-                  {
-                  }
-                  else if(!BIC)
-                  {
-                     occupied[rsel][csel] = 0;
-                        if (BlackInCheck(bkr, bkc))
-                        {
-                           int hold = occupied[row][col];
-                           occupied[row][col] = 2;
-                           
-                           if(BlackInCheck(bkr, bkc))
-                           {
-                              occupied[rsel][csel] = 2;
-                              occupied[row][col] = hold;
-                              turn = ! turn;
-                           }
-                           
-                           else 
-                           {
-                              occupied[rsel][csel] = 2;
-                              occupied[row][col] = hold;
-                              Capture(row, col, rsel, csel); 
-                              if (row == 7)
-                        {
-                           living[row][col] = null;
-                           living[row][col] = new  queen(row, col,2, 10);
-                           board[row][col].setIcon(imageArray[9]);
-            
-                        }
-                           }
-                        }
-                        else
-                        {
-                           occupied[rsel][csel] = 2;
-                           Capture(row, col, rsel, csel); 
-                           if (row == 7)
-                        {
-                           living[row][col] = null;
-                           living[row][col] = new  queen(row, col,2, 10);
-                           board[row][col].setIcon(imageArray[9]);
-            
-                        }
-                        }
-                        turn = !turn;
-                  }
-               }
             }
             
             else if (living[rsel][csel].getType() == 3) // white knight
             {
                if (living[rsel][csel].canMove(row, col) && occupied[row][col] != 1 && (row!=bkr || col!=bkc))
                {
-                  if (occupied[row][col] != 0)
-                  {
-                     captured = true;
-                  }
-                  else
-                  {
-                     captured = false;
-                  }
+
                   
                   if (WIC && HowManyCheckingWhite(wkr, wkc) == 2)
                   {
@@ -461,7 +256,7 @@ public class Chess extends JPanel {
                   {
                      if (living[row][col] == WhichPieceIsCheckingWhite(wkr, wkc) || BlockACheck(wkr, wkc, WhichPieceIsCheckingWhite(wkr, wkc).getRow(),  WhichPieceIsCheckingWhite(wkr, wkc).getCol(), row, col))/*:)*/
                      {
-                        Capture(row, col, rsel, csel);
+                        move(row, col, rsel, csel);
                         turn = !turn;
                      }
                   }
@@ -469,7 +264,7 @@ public class Chess extends JPanel {
                   {
                      if (living[row][col] == WhichPieceIsCheckingWhite(wkr, wkc))/*:)*/
                      {
-                        Capture(row, col, rsel, csel);
+                        move(row, col, rsel, csel);
                         turn = !turn;
                      }
                   }
@@ -492,13 +287,13 @@ public class Chess extends JPanel {
                            {
                               occupied[rsel][csel] = 1;
                               occupied[row][col] = hold;
-                              Capture(row, col, rsel, csel); 
+                              move(row, col, rsel, csel); 
                            }
                         }
                         else
                         {
                            occupied[rsel][csel] = 1;
-                           Capture(row, col, rsel, csel); 
+                           move(row, col, rsel, csel); 
                         }
                         turn = !turn;
                   } /////// for white
@@ -510,14 +305,7 @@ public class Chess extends JPanel {
                if (living[rsel][csel].canMove(row, col) && occupied[row][col] != 2 && (row!=wkr || col!=wkc))
                {
                   
-                  if (occupied[row][col] != 0)
-                  {
-                     captured = true;
-                  }
-                  else
-                  {
-                     captured = false;
-                  }
+
                   
                   if(BIC && HowManyCheckingBlack(bkr, bkc) == 2)
                   {
@@ -526,7 +314,7 @@ public class Chess extends JPanel {
                   {
                      if (living[row][col] == WhichPieceIsCheckingBlack(bkr, bkc) || BlockACheck(bkr, bkc, WhichPieceIsCheckingBlack(bkr, bkc).getRow(),  WhichPieceIsCheckingBlack(bkr, bkc).getCol(), row, col))/*:)*/
                      {
-                        Capture(row, col, rsel, csel); 
+                        move(row, col, rsel, csel); 
                         turn = !turn;
                      }
                   }
@@ -534,7 +322,7 @@ public class Chess extends JPanel {
                   {
                      if (living[row][col] == WhichPieceIsCheckingBlack(bkr, bkc))
                      {
-                        Capture(row, col, rsel, csel); 
+                        move(row, col, rsel, csel); 
                         turn = !turn;
                      }
                   }
@@ -557,13 +345,13 @@ public class Chess extends JPanel {
                            {
                               occupied[rsel][csel] = 2;
                               occupied[row][col] = hold;
-                              Capture(row, col, rsel, csel); 
+                              move(row, col, rsel, csel); 
                            }
                         }
                         else
                         {
                            occupied[rsel][csel] = 2;
-                           Capture(row, col, rsel, csel); 
+                           move(row, col, rsel, csel); 
                         }
                         turn = !turn;
                   }
@@ -574,14 +362,7 @@ public class Chess extends JPanel {
             {
                if (living[rsel][csel].canMove(row, col) && occupied[row][col] != 1 && NoPieceBetween(row, col, rsel, csel) && (row!=bkr || col!=bkc))
                {
-                  if (occupied[row][col] != 0)
-                  {
-                     captured = true;
-                  }
-                  else
-                  {
-                     captured = false;
-                  }
+
                   if (WIC && HowManyCheckingWhite(wkr, wkc) == 2)
                   {
                   }
@@ -589,7 +370,7 @@ public class Chess extends JPanel {
                   {
                      if (living[row][col] == WhichPieceIsCheckingWhite(wkr, wkc) || BlockACheck(wkr, wkc, WhichPieceIsCheckingWhite(wkr, wkc).getRow(),  WhichPieceIsCheckingWhite(wkr, wkc).getCol(), row, col))/*:)*/
                      {
-                        Capture(row, col, rsel, csel);
+                        move(row, col, rsel, csel);
                         turn = !turn;
                         WKORM = true;
                      }
@@ -598,7 +379,7 @@ public class Chess extends JPanel {
                   {
                      if (living[row][col] == WhichPieceIsCheckingWhite(wkr, wkc))/*:)*/
                      {
-                        Capture(row, col, rsel, csel);
+                        move(row, col, rsel, csel);
                         turn = !turn;
                         WKORM = true;
                      }
@@ -622,14 +403,14 @@ public class Chess extends JPanel {
                            {
                               occupied[rsel][csel] = 1;
                               occupied[row][col] = hold;
-                              Capture(row, col, rsel, csel); 
+                              move(row, col, rsel, csel); 
                               WKORM = true;
                            }
                         }
                         else
                         {
                            occupied[rsel][csel] = 1;
-                           Capture(row, col, rsel, csel); 
+                           move(row, col, rsel, csel); 
                            WKORM = true;
                         }
                         turn = !turn;
@@ -641,14 +422,7 @@ public class Chess extends JPanel {
             {
                if (living[rsel][csel].canMove(row, col) && occupied[row][col] != 2 && NoPieceBetween(row, col, rsel, csel)&& (row!=wkr || col!=wkc))
                {
-                  if (occupied[row][col] != 0)
-                  {
-                     captured = true;
-                  }
-                  else
-                  {
-                     captured = false;
-                  }
+
                   
                   if(BIC && HowManyCheckingBlack(bkr, bkc) == 2)
                   {
@@ -657,7 +431,7 @@ public class Chess extends JPanel {
                   {
                      if (living[row][col] == WhichPieceIsCheckingBlack(bkr, bkc) || BlockACheck(bkr, bkc, WhichPieceIsCheckingBlack(bkr, bkc).getRow(),  WhichPieceIsCheckingBlack(bkr, bkc).getCol(), row, col))/*:)*/
                      {
-                        Capture(row, col, rsel, csel); 
+                        move(row, col, rsel, csel); 
                         turn = !turn;
                         BKORM = true;
                      }
@@ -666,7 +440,7 @@ public class Chess extends JPanel {
                   {
                      if (living[row][col] == WhichPieceIsCheckingBlack(bkr, bkc))/*:)*/
                      {
-                        Capture(row, col, rsel, csel); 
+                        move(row, col, rsel, csel); 
                         turn = !turn;
                         BKORM = true;
                      }
@@ -690,14 +464,14 @@ public class Chess extends JPanel {
                            {
                               occupied[rsel][csel] = 2;
                               occupied[row][col] = hold;
-                              Capture(row, col, rsel, csel); 
+                              move(row, col, rsel, csel); 
                               BKORM = true;
                            }
                         }
                         else
                         {
                            occupied[rsel][csel] = 2;
-                           Capture(row, col, rsel, csel); 
+                           move(row, col, rsel, csel); 
                            BKORM = true;
                         }
                         turn = !turn;
@@ -709,14 +483,7 @@ public class Chess extends JPanel {
             {
                if (living[rsel][csel].canMove(row, col) && occupied[row][col] != 1 && NoPieceBetween(row, col, rsel, csel) &&( row!=bkr || col!=bkc))
                {
-                  if (occupied[row][col] != 0)
-                  {
-                     captured = true;
-                  }
-                  else
-                  {
-                     captured = false;
-                  }
+
                   if (WIC && HowManyCheckingWhite(wkr, wkc) == 2)
                   {
                   }
@@ -724,7 +491,7 @@ public class Chess extends JPanel {
                   {
                      if (living[row][col] == WhichPieceIsCheckingWhite(wkr, wkc) || BlockACheck(wkr, wkc, WhichPieceIsCheckingWhite(wkr, wkc).getRow(),  WhichPieceIsCheckingWhite(wkr, wkc).getCol(), row, col))/*:)*/
                      {
-                        Capture(row, col, rsel, csel);
+                        move(row, col, rsel, csel);
                         turn = !turn;
                      }
                   }
@@ -732,7 +499,7 @@ public class Chess extends JPanel {
                   {
                      if (living[row][col] == WhichPieceIsCheckingWhite(wkr, wkc))/*:)*/
                      {
-                        Capture(row, col, rsel, csel);
+                        move(row, col, rsel, csel);
                         turn = !turn;
                      }
                   }
@@ -755,13 +522,13 @@ public class Chess extends JPanel {
                            {
                               occupied[rsel][csel] = 1;
                               occupied[row][col] = hold;
-                              Capture(row, col, rsel, csel); 
+                              move(row, col, rsel, csel); 
                            }
                         }
                         else
                         {
                            occupied[rsel][csel] = 1;
-                           Capture(row, col, rsel, csel); 
+                           move(row, col, rsel, csel); 
                         }
                         turn = !turn;
                   } /////// for white
@@ -772,14 +539,7 @@ public class Chess extends JPanel {
             {
                if (living[rsel][csel].canMove(row, col) && occupied[row][col] != 2 && NoPieceBetween(row, col, rsel, csel)&& (row!=wkr || col!=wkc))
                {
-                  if (occupied[row][col] != 0)
-                  {
-                     captured = true;
-                  }
-                  else
-                  {
-                     captured = false;
-                  }
+
                   
                   if(BIC && HowManyCheckingBlack(bkr, bkc) == 2)
                   {
@@ -788,7 +548,7 @@ public class Chess extends JPanel {
                   {
                      if (living[row][col] == WhichPieceIsCheckingBlack(bkr, bkc) || BlockACheck(bkr, bkc, WhichPieceIsCheckingBlack(bkr, bkc).getRow(),  WhichPieceIsCheckingBlack(bkr, bkc).getCol(), row, col))/*:)*/
                      {
-                        Capture(row, col, rsel, csel); 
+                        move(row, col, rsel, csel); 
                         turn = !turn;
                      }
                   }
@@ -796,7 +556,7 @@ public class Chess extends JPanel {
                   {
                      if (living[row][col] == WhichPieceIsCheckingBlack(bkr, bkc))/*:)*/
                      {
-                        Capture(row, col, rsel, csel); 
+                        move(row, col, rsel, csel); 
                         turn = !turn;
                      }
                   }
@@ -819,13 +579,13 @@ public class Chess extends JPanel {
                            {
                               occupied[rsel][csel] = 2;
                               occupied[row][col] = hold;
-                              Capture(row, col, rsel, csel); 
+                              move(row, col, rsel, csel); 
                            }
                         }
                         else
                         {
                            occupied[rsel][csel] = 2;
-                           Capture(row, col, rsel, csel); 
+                           move(row, col, rsel, csel); 
                         }
                         turn = !turn;
                   }
@@ -836,15 +596,7 @@ public class Chess extends JPanel {
             {
                if (living[rsel][csel].canMove(row, col) && occupied[row][col] != 2 && NoPieceBetween(row, col, rsel, csel)&& (row!=wkr || col!=wkc))
                {
-                  if (occupied[row][col] != 0)
-                  {
-                     captured = true;
-                  }
-                  else
-                  {
-                     captured = false;
-                  }
-                  
+
                   if(BIC && HowManyCheckingBlack(bkr, bkc) == 2)
                   {
                   }
@@ -852,7 +604,7 @@ public class Chess extends JPanel {
                   {
                      if (living[row][col] == WhichPieceIsCheckingBlack(bkr, bkc) || BlockACheck(bkr, bkc, WhichPieceIsCheckingBlack(bkr, bkc).getRow(),  WhichPieceIsCheckingBlack(bkr, bkc).getCol(), row, col))/*:)*/
                      {
-                        Capture(row, col, rsel, csel); 
+                        move(row, col, rsel, csel); 
                         turn = !turn;
                      }
                   }
@@ -860,7 +612,7 @@ public class Chess extends JPanel {
                   {
                      if (living[row][col] == WhichPieceIsCheckingBlack(bkr, bkc))/*:)*/
                      {
-                        Capture(row, col, rsel, csel); 
+                        move(row, col, rsel, csel); 
                         turn = !turn;
                      }
                   }
@@ -883,13 +635,13 @@ public class Chess extends JPanel {
                            {
                               occupied[rsel][csel] = 2;
                               occupied[row][col] = hold;
-                              Capture(row, col, rsel, csel); 
+                              move(row, col, rsel, csel); 
                            }
                         }
                         else
                         {
                            occupied[rsel][csel] = 2;
-                           Capture(row, col, rsel, csel); 
+                           move(row, col, rsel, csel); 
                         }
                         turn = !turn;
                   }
@@ -900,14 +652,7 @@ public class Chess extends JPanel {
             {
                if (living[rsel][csel].canMove(row, col) && occupied[row][col] != 1 && NoPieceBetween(row, col, rsel, csel)&& (row!=bkr || col!=bkc))
                {
-                  if (occupied[row][col] != 0)
-                  {
-                     captured = true;
-                  }
-                  else
-                  {
-                     captured = false;
-                  }
+
                   
                   if (WIC && HowManyCheckingWhite(wkr, wkc) == 2)
                   {
@@ -917,7 +662,7 @@ public class Chess extends JPanel {
                   {
                      if (living[row][col] == WhichPieceIsCheckingWhite(wkr, wkc) || BlockACheck(wkr, wkc, WhichPieceIsCheckingWhite(wkr, wkc).getRow(),  WhichPieceIsCheckingWhite(wkr, wkc).getCol(), row, col))/*:)*/
                      {
-                        Capture(row, col, rsel, csel);
+                        move(row, col, rsel, csel);
                         turn = !turn;
                      }
                   }
@@ -925,7 +670,7 @@ public class Chess extends JPanel {
                   {
                      if (living[row][col] == WhichPieceIsCheckingWhite(wkr, wkc))/*:)*/
                      {
-                        Capture(row, col, rsel, csel);
+                        move(row, col, rsel, csel);
                         turn = !turn;
                      }
                   }
@@ -949,13 +694,13 @@ public class Chess extends JPanel {
                            {
                               occupied[rsel][csel] = 1;
                               occupied[row][col] = hold;
-                              Capture(row, col, rsel, csel); 
+                              move(row, col, rsel, csel); 
                            }
                         }
                         else
                         {
                            occupied[rsel][csel] = 1;
-                           Capture(row, col, rsel, csel); 
+                           move(row, col, rsel, csel); 
                         }
                         turn = !turn;
                   } 
@@ -966,35 +711,28 @@ public class Chess extends JPanel {
             {
                if ((row == 7 && col == 6 && !WKORM && !WhiteInCheck(wkr, wkc) && occupied[7][5] == 0 && occupied[7][6] == 0 && !WhiteInCheck(7, 6) && !WhiteInCheck(7, 5)) )
                {
-                  Capture(row, col, rsel, csel); 
+                  move(row, col, rsel, csel); 
                      turn = !turn;
                      wkc = col;
                      wkr = row;
                      WKORM = true;
-                  Capture(row, col-1, 7,7);
+                     move(row, col-1, 7,7);
                }
                else if (row == 7 && col == 2 && !WKORM && !WhiteInCheck(wkr, wkc) && occupied[7][1] == 0 && occupied[7][2] == 0 && occupied[7][3] == 0 && !WhiteInCheck(7, 1) && !WhiteInCheck(7, 2) && !WhiteInCheck(7, 3))
                {
-                  Capture(row, col, rsel, csel); 
+                  move(row, col, rsel, csel); 
                      turn = !turn;
                      wkc = col;
                      wkr = row;
                      WKORM = true;
-                  Capture(row, col+1, 7,0);
+                     move(row, col+1, 7,0);
                }
                else if (living[rsel][csel].canMove(row, col) && occupied[row][col] != 1&& (row!=bkr || col!=bkc))
                {
-                  if (occupied[row][col] != 0)
-                  {
-                     captured = true;
-                  }
-                  else
-                  {
-                     captured = false;
-                  }
+
                   if (WhiteInCheck(row, col) == false)
                   {
-                     Capture(row, col, rsel, csel); 
+                     move(row, col, rsel, csel); 
                      turn = !turn;
                      wkc = col;
                      wkr = row;
@@ -1008,35 +746,28 @@ public class Chess extends JPanel {
             {
                if ((row == 0 && col == 6 && !BKORM && !BlackInCheck(bkr, bkc) && occupied[0][5] == 0 && occupied[0][6] == 0 && !BlackInCheck(0, 6) && !BlackInCheck(0, 5)) )
                {
-                  Capture(row, col, rsel, csel); 
+                  move(row, col, rsel, csel); 
                      turn = !turn;
                      bkc = col;
                      bkr = row;
                      BKORM = true;
-                  Capture(row, col-1, 0,7);
+                     move(row, col-1, 0,7);
                }
                else if (row == 0 && col == 2 && !BKORM && !BlackInCheck(bkr, bkc) && occupied[0][1] == 0 && occupied[0][2] == 0 && occupied[0][3] == 0 && !BlackInCheck(0, 1) && !BlackInCheck(0, 2) && !BlackInCheck(0, 3))
                {
-                  Capture(row, col, rsel, csel); 
+                  move(row, col, rsel, csel); 
                      turn = !turn;
                      bkc = col;
                      bkr = row;
                      BKORM = true;
-                  Capture(row, col+1, 0,0);
+                     move(row, col+1, 0,0);
                }
                else if (living[rsel][csel].canMove(row, col) && occupied[row][col] != 2&& (row!=wkr || col!=wkc))
                {
-                  if (occupied[row][col] != 0)
-                  {
-                     captured = true;
-                  }
-                  else
-                  {
-                     captured = false;
-                  }
+
                   if(BlackInCheck(row, col) == false)
                   {
-                     Capture(row, col, rsel, csel); 
+                     move(row, col, rsel, csel); 
                      turn = !turn;
                      bkc = col;
                      bkr = row;
@@ -1274,7 +1005,7 @@ public class Chess extends JPanel {
    
      
    
-   public void Capture(int row, int col, int rsel, int csel){
+   public void move(int row, int col, int rsel, int csel){
       living[rsel][csel].setLocation(row, col);
       living[row][col] = living[rsel][csel];
       living[rsel][csel] = null;
