@@ -5,38 +5,24 @@ import java.awt.event.*;
 /* MY DOCUMENTATION
 ///////////////////////////////////////
 VARIABLES
-bkr - black king row
+wkr, wkc, bkr, bkc - color/king/row/column
 occupied[][] - array of ints (0: unoccupied, 1: whte piece, 2: black piece)
 living[][] - array of piece objects
+turn - true is white turn
 
 ///////////////////////////////////////
 when dealing with colors - 1 is white, 2 is black
-
-TYPES
-1 - wp
-2 - bp
-3 - wk
-4 - bk
-5 - wb
-6 - bb
-7 - wr
-8 - br
-9 - wq
-10 - bq
-11 - wking
-12 - bking
 */
 
 public class Chess extends JPanel {
    private JButton[][]board = new JButton[8][8];
    private int[][]occupied = new int[8][8]; //0-none, 1-white, 2-black
-   //private ImageIcon bb, wb, bp, wp, bk, wk, br, wr, bK, wK, bq, wq;
    private ImageIcon [] imageArray = new ImageIcon[12];
    private boolean selected;
    private int bcheckr, bcheckc, wcheckr, wcheckc;
    int rsel, csel;
    int bkr, bkc, wkr, wkc; // black king's position
-   Color previous, previous2, previous3; // stack overflow
+   Color previous, previous2, previous3;
    private pieces[][]living = new pieces[8][8]; // active pieces
    private boolean turn, captured; // true - white
    private boolean WIC, BIC, WKORM, BKORM;
@@ -60,13 +46,14 @@ public class Chess extends JPanel {
                b[r][c].setBackground(Color.white);
             else
                b[r][c].setBackground(Color.gray);
-            b[r][c].setOpaque(true);// stack overflow
-            b[r][c].setBorderPainted(false); // stack overflow
+            b[r][c].setOpaque(true);
+            b[r][c].setBorderPainted(false); 
          }
       }
    }
 
    public static void setPieces(JButton[][]b, int[][]o, pieces[][]l, ImageIcon[]i){
+      //SETS THE OBJECT OF EACH PIECE
       for (int r = 0; r < 8; r++){
          for (int c = 0; c < 8; c++){
             if (r == 2){
@@ -74,7 +61,6 @@ public class Chess extends JPanel {
                c = -1;
                continue;
             }
-
             int isBlack = 1;
             if (r == 7) isBlack = 0;
 
@@ -94,6 +80,7 @@ public class Chess extends JPanel {
                l[r][c] = new queen(r, c, o[r][c], 9+isBlack);
          }
       }
+      //SETS THE IMAGE FOR THE BUTTON
       for (int r = 0; r < 8; r++){
          for (int c = 0; c < 8; c++){
             if (l[r][c] != null)
@@ -137,20 +124,6 @@ public class Chess extends JPanel {
       imageArray[9] = new ImageIcon("BQueen.PNG");
       imageArray[10] = new ImageIcon("WKing.PNG");
       imageArray[11] = new ImageIcon("BKing.PNG");
-      //
-
-      /*wb = new ImageIcon("WBishop.PNG");
-      bb = new ImageIcon("BBishop.PNG");
-      bp = new ImageIcon("BPawn.PNG");
-      wp = new ImageIcon("WPawn.PNG");
-      bk = new ImageIcon("Bknight.PNG");
-      wk = new ImageIcon("WKnight.PNG");
-      br = new ImageIcon("BRook.PNG");
-      wr = new ImageIcon("WRook.PNG");
-      bK = new ImageIcon("BKing.PNG");
-      wK = new ImageIcon("WKing.PNG");
-      bq = new ImageIcon("BQueen.PNG");
-      wq = new ImageIcon("WQueen.PNG");*/
       
       bkc = 4;
       bkr = 0;
@@ -158,110 +131,64 @@ public class Chess extends JPanel {
       wkr = 7;
         
       setBoard(occupied, board);
+      setPieces(board, occupied, living, imageArray);
+
       for(int r = 0; r<8; r++){
          for(int c = 0; c<8; c++){ 
             add(board[r][c]);  
-            previous = board[0][0].getBackground();//stackoverflow
+            previous = board[0][0].getBackground();
             previous3 = Color.gray;
             previous2 = board[0][0].getBackground();
-            
-            board[r][c].addActionListener(new PieceSelected(r, c));
-            
-            setPieces(board, occupied, living, imageArray);
-            // instantiates Icons and piece objects
-
-            
-          bigBoard.add(board[r][c]);
+            board[r][c].addActionListener(new PieceSelected(r, c)); 
+            bigBoard.add(board[r][c]);
          }
       }
       add(bigBoard, BorderLayout.CENTER);
    }   
       
-   
-   
-   
-   
+   private class PieceSelected implements ActionListener{
 
-   
-   
-   
-   private class PieceSelected implements ActionListener
-   {
       int row, col;
-      public PieceSelected(int r, int c)
-      {
+
+      public PieceSelected(int r, int c){
          row = r;
          col = c;
       }
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
+
       //////////////////////////////////////////////////////
       //ACTION LISTENER
       /////////////////////////////////////////////////////
          
-      public void actionPerformed(ActionEvent PieceSelection)
-      {
-
-         
-         //is a king in check
+      public void actionPerformed(ActionEvent PieceSelection){
+         // CHECKING IF A KING IS IN CHECK
          WIC = false;
          BIC = false;
-         if (WhiteInCheck(wkr, wkc)) //white
-         {
-            WIC = true;
-         }
-         if (BlackInCheck(bkr, bkc)) //black
-         {
-            BIC = true;
-         }
+         if (turn && WhiteInCheck(wkr, wkc)) WIC = true;
+         if ((!turn) && BlackInCheck(bkr, bkc)) BIC = true;
          
-      
-         
-         if (!selected)                   // highlights square
-         {
-            if ((occupied[row][col] == 1 && turn) || (occupied[row][col] == 2 && !turn))
-            {
+         if (!selected){ //NOTHING IS SELECTED YET, SO HIGHLIGHT THE SQUARE
+            if ((occupied[row][col] == 1 && turn) || (occupied[row][col] == 2 && !turn)){
                selected = true;
                rsel = row;
                csel = col;
                previous = board[row][col].getBackground();
-               board[row][col].setBackground(Color.yellow); // stack overflow
+               board[row][col].setBackground(Color.yellow); 
             }
             captured = false;
          }
-         
-         else if (selected && rsel == row && csel == col)   //unhighlight
-         {
+         else if (selected && rsel == row && csel == col){ //UNSELECT A PIECE
             selected = false;
             board[rsel][csel].setBackground(previous);
             captured = false;
          }
-         
-         
-         else// moves or captures ////////////////////
-         {
+         else{ //MOVES THE SELECTED PIECE
             selected = false;
-            board[rsel][csel].setBackground(previous); // stack overflow
-            if (living[rsel][csel].getType() == 1) // White Pawns
-            {
-/*capturing*/  if (occupied[row][col] == 2 && living[rsel][csel].canCapture(row, col) && NoPieceBetween(row, col, rsel, csel) && (row!=bkr || col!=bkc))
-               {
-                  if (occupied[row][col] != 0)
-                  {
-                     captured = true;
-                  }
-                  else
-                  {
-                     captured = false;
-                  }
+            board[rsel][csel].setBackground(previous); 
+            if (living[rsel][csel].getType() == 1){ //WHITE PAWN
+               if (occupied[row][col] == 2 && living[rsel][csel].canCapture(row, col) && 
+                         (row!=bkr || col!=bkc)){ //FOR CAPTURING
+                  if (occupied[row][col] != 0) captured = true;
+                  else captured = false;
                   
                   if (WIC && HowManyCheckingWhite(wkr, wkc) == 1)
                   {
