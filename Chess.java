@@ -187,11 +187,13 @@ public class Chess extends JPanel {
             if (living[rsel][csel].getType() == 1){ //WHITE PAWN
                if (occupied[row][col] == 2 && living[rsel][csel].canCapture(row, col) && 
                          (row!=bkr || col!=bkc)){ //FOR CAPTURING
-                  if (occupied[row][col] != 0) captured = true;
-                  else captured = false;
+                  captured = true;
                   
-                  if (WIC && HowManyCheckingWhite(wkr, wkc) == 1)
-                  {
+                  //pieces selectedPiece = new 
+                  //Capture(row, col, rsel, csel);
+
+                  /*
+                  if (WIC && HowManyCheckingWhite(wkr, wkc) == 1){
                      if (living[row][col] == WhichPieceIsCheckingWhite(wkr, wkc))
                      {
                         Capture(row, col, rsel, csel);
@@ -251,7 +253,7 @@ public class Chess extends JPanel {
                         }
                         turn = !turn;
                      
-                  }
+                  }*/
                }
 /*moving*/     else if (occupied[row][col] == 0 && living[rsel][csel].canMove(row, col))
                {
@@ -1316,9 +1318,7 @@ public class Chess extends JPanel {
    
      
    
-   public void Capture(int row, int col, int rsel, int csel)
-   {
-      
+   public void Capture(int row, int col, int rsel, int csel){
       living[rsel][csel].setLocation(row, col);
       living[row][col] = living[rsel][csel];
       living[rsel][csel] = null;
