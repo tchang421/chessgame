@@ -1,7 +1,19 @@
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-//hehe clean
+
+/* MY DOCUMENTATION
+///////////////////////////////////////
+VARIABLES
+bkr - black king row
+occupied[][] - array of ints (0: unoccupied, 1: whte piece, 2: black piece)
+x - alternates for setting the color of the board
+///////////////////////////////////////
+
+
+
+*/
+
 public class Chess extends JPanel
 {
    private JButton[][]Board = new JButton[8][8];
@@ -17,6 +29,32 @@ public class Chess extends JPanel
    private boolean WIC, BIC, WKORM, BKORM;
    private JButton exit;
    private JPanel BigBoard;
+
+   public static void setBoard(int[][] oc, JButton[][] b){
+      for(int r = 0; r<8; r++)
+      {
+         for(int c = 0; c<8; c++)
+         { 
+            // SETS THE BOARD OCCPUATION
+            if (r<2)
+               oc[r][c] = 2;
+            else if (r>5)
+               oc[r][c] = 1;
+            else 
+               oc[r][c] = 0;
+
+            // SETS THE COLOR OF THE BOARD
+            b[r][c] = new JButton();
+            if ((r+c)%2 == 0)
+               b[r][c].setBackground(Color.white);
+            else
+               b[r][c].setBackground(Color.gray);
+            b[r][c].setOpaque(true);// stack overflow
+            b[r][c].setBorderPainted(false); // stack overflow
+
+         }
+      }
+   }
  
    public Chess()
    { 
@@ -60,18 +98,13 @@ public class Chess extends JPanel
       wkc = 4;
       wkr = 7;
         
+      setBoard(occupied, Board);
       for(int r = 0; r<8; r++)
       {
          for(int c = 0; c<8; c++)
          { 
-            if (r<2)
-               occupied[r][c] = 2;
-            else if (r>5)
-               occupied[r][c] = 1;
-            else 
-               occupied[r][c] = 0;
             
-            Board[r][c] = new JButton();
+            /*Board[r][c] = new JButton();
             if (x == -1)
             {
                Board[r][c].setBackground(Color.gray); // stack overflow
@@ -86,6 +119,7 @@ public class Chess extends JPanel
             }
             Board[r][c].setOpaque(true);// stack overflow
             Board[r][c].setBorderPainted(false); // stack overflow
+            */
             add(Board[r][c]);  
             previous = Board[0][0].getBackground();//stackoverflow
             previous3 = Color.gray;
