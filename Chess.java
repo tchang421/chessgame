@@ -181,15 +181,17 @@ public class Chess extends JPanel {
             board[rsel][csel].setBackground(previous);
          }
          else{
-         ///////////////////////////////////////////////////////////////////////
-         ///////////////////////////////////////////////////////////////////////
-         //MOVING THE SELECTED PIECE
-         ///////////////////////////////////////////////////////////////////////
-         ///////////////////////////////////////////////////////////////////////
+            ///////////////////////////////////////////////////////////////////////
+            ///////////////////////////////////////////////////////////////////////
+            //MOVING THE SELECTED PIECE
+            ///////////////////////////////////////////////////////////////////////
+            ///////////////////////////////////////////////////////////////////////
             selected = false;
             board[rsel][csel].setBackground(previous); 
-            if (living[rsel][csel].getType() <= 2){ //WHITE PAWN
-               if (occupied[row][col] != occupied[rsel][csel] && living[rsel][csel].canCapture(row, col) 
+
+            if (living[rsel][csel].getType() <= 2){ //PAWN
+               if (occupied[row][col] != occupied[rsel][csel] && occupied[row][col] != 0
+                        && living[rsel][csel].canCapture(row, col) 
                         && (row!=bkr || col!=bkc) && (row!=wkr || col!=wkc)){ //FOR CAPTURING
                   
                   pieces temp = living[row][col];
@@ -217,7 +219,7 @@ public class Chess extends JPanel {
                      turn = !turn;
                   }
                }
-/*moving*/     else if (occupied[row][col] == 0 && living[rsel][csel].canMove(row, col)){
+               else if (occupied[row][col] == 0 && living[rsel][csel].canMove(row, col)){
                   move(row, col, rsel, csel);
                   if (WhiteInCheck(wkr, wkc)&&turn || BlackInCheck(bkr, bkc)&&!turn){
                      //RESET THE OLD SPACE
@@ -244,583 +246,54 @@ public class Chess extends JPanel {
                } 
             }
             
-            else if (living[rsel][csel].getType() == 3){ // white knight
-               pieces temp;
-               if (occupied[row][col] != 0) temp = living[row][col];
-               else temp = null;
+            else if (living[rsel][csel].getType() >= 3){ // white knight
+               if (occupied[row][col] != occupied[rsel][csel] 
+                     && living[rsel][csel].canMove(row, col)
+                     && (row!=bkr || col!=bkc) && (row!=wkr || col!=wkc)){
+                  pieces temp;
+                  if (occupied[row][col] != 0) temp = living[row][col];
+                  else temp = null;
 
-               move(row, col, rsel, csel);
-               if (WhiteInCheck(wkr, wkc)&&turn){
-                  //RESET THE OLD SPACE
-                  living[row][col].setLocation(rsel, csel);
-                  living[rsel][csel] = living[row][col];
-                  occupied[rsel][csel] = living[rsel][csel].getColor();
-                  board[rsel][csel].setIcon(board[row][col].getIcon());
-                  //RESET THE CAPTURED SPACE
-                  if (temp == null){
-                     living[row][col] = null;
-                     occupied[row][col] = 0;
-                     board[row][col].setIcon(null);
+                  move(row, col, rsel, csel);
+                  if (WhiteInCheck(wkr, wkc)&&turn){
+                     //RESET THE OLD SPACE
+                     living[row][col].setLocation(rsel, csel);
+                     living[rsel][csel] = living[row][col];
+                     occupied[rsel][csel] = living[rsel][csel].getColor();
+                     board[rsel][csel].setIcon(board[row][col].getIcon());
+                     //RESET THE CAPTURED SPACE
+                     if (temp == null){
+                        living[row][col] = null;
+                        occupied[row][col] = 0;
+                        board[row][col].setIcon(null);
+                     }
+                     else{
+                        living[row][col] = temp;
+                        occupied[row][col] = temp.getColor();
+                        board[row][col].setIcon(imageArray[temp.getType()-1]);
+                     }
                   }
-                  else{
-                     living[row][col] = temp;
-                     occupied[row][col] = temp.getColor();
-                     board[row][col].setIcon(imageArray[temp.getType()-1]);
-                  }
+                  else  
+                     turn = !turn;  
                }
-               else  
-                  turn = !turn;
-               /*if (living[rsel][csel].canMove(row, col) && occupied[row][col] != 1 && (row!=bkr || col!=bkc))
-               {
-
-                  
-                  if (WIC && HowManyCheckingWhite(wkr, wkc) == 2)
-                  {
-                  }
-                  else if (WIC && WhichPieceIsCheckingWhite(wkr, wkc).getType() != 4)//////for white
-                  {
-                     if (living[row][col] == WhichPieceIsCheckingWhite(wkr, wkc) || BlockACheck(wkr, wkc, WhichPieceIsCheckingWhite(wkr, wkc).getRow(),  WhichPieceIsCheckingWhite(wkr, wkc).getCol(), row, col))/*:)
-                     {
-                        move(row, col, rsel, csel);
-                        turn = !turn;
-                     }
-                  }
-                  else if (WIC && WhichPieceIsCheckingWhite(wkr, wkc).getType() == 4)
-                  {
-                     if (living[row][col] == WhichPieceIsCheckingWhite(wkr, wkc))/*:)
-                     {
-                        move(row, col, rsel, csel);
-                        turn = !turn;
-                     }
-                  }
-                  else
-                  {
-                        occupied[rsel][csel] = 0;
-                        if (WhiteInCheck(wkr, wkc))
-                        {
-                           int hold = occupied[row][col];
-                           occupied[row][col] = 1;
-                           
-                           if(WhiteInCheck(wkr, wkc))
-                           {
-                              occupied[rsel][csel] = 1;
-                              occupied[row][col] = hold;
-                              turn = ! turn;
-                           }
-                           
-                           else 
-                           {
-                              occupied[rsel][csel] = 1;
-                              occupied[row][col] = hold;
-                              move(row, col, rsel, csel); 
-                           }
-                        }
-                        else
-                        {
-                           occupied[rsel][csel] = 1;
-                           move(row, col, rsel, csel); 
-                        }
-                        turn = !turn;
-                  } /////// for white
-               }*/
-            }
-            
-            else if (living[rsel][csel].getType() == 4) // black knight
-            {
-               if (living[rsel][csel].canMove(row, col) && occupied[row][col] != 2 && (row!=wkr || col!=wkc))
-               {
-                  
-
-                  
-                  if(BIC && HowManyCheckingBlack(bkr, bkc) == 2)
-                  {
-                  }
-                  else if (BIC && WhichPieceIsCheckingBlack(bkr, bkc).getType() != 3)
-                  {
-                     if (living[row][col] == WhichPieceIsCheckingBlack(bkr, bkc) || BlockACheck(bkr, bkc, WhichPieceIsCheckingBlack(bkr, bkc).getRow(),  WhichPieceIsCheckingBlack(bkr, bkc).getCol(), row, col))/*:)*/
-                     {
-                        move(row, col, rsel, csel); 
-                        turn = !turn;
-                     }
-                  }
-                  else if (BIC && WhichPieceIsCheckingBlack(bkr, bkc).getType() == 3)
-                  {
-                     if (living[row][col] == WhichPieceIsCheckingBlack(bkr, bkc))
-                     {
-                        move(row, col, rsel, csel); 
-                        turn = !turn;
-                     }
-                  }
-                  else
-                  {
-                     occupied[rsel][csel] = 0;
-                        if (BlackInCheck(bkr, bkc))
-                        {
-                           int hold = occupied[row][col];
-                           occupied[row][col] = 2;
-                           
-                           if(BlackInCheck(bkr, bkc))
-                           {
-                              occupied[rsel][csel] = 2;
-                              occupied[row][col] = hold;
-                              turn = ! turn;
-                           }
-                           
-                           else 
-                           {
-                              occupied[rsel][csel] = 2;
-                              occupied[row][col] = hold;
-                              move(row, col, rsel, csel); 
-                           }
-                        }
-                        else
-                        {
-                           occupied[rsel][csel] = 2;
-                           move(row, col, rsel, csel); 
-                        }
-                        turn = !turn;
-                  }
-               }
-            }
-            
-            else if (living[rsel][csel].getType() == 7)// white rook
-            {
-               if (living[rsel][csel].canMove(row, col) && occupied[row][col] != 1 && NoPieceBetween(row, col, rsel, csel) && (row!=bkr || col!=bkc))
-               {
-
-                  if (WIC && HowManyCheckingWhite(wkr, wkc) == 2)
-                  {
-                  }
-                  else if (WIC && WhichPieceIsCheckingWhite(wkr, wkc).getType() != 4)//////for white
-                  {
-                     if (living[row][col] == WhichPieceIsCheckingWhite(wkr, wkc) || BlockACheck(wkr, wkc, WhichPieceIsCheckingWhite(wkr, wkc).getRow(),  WhichPieceIsCheckingWhite(wkr, wkc).getCol(), row, col))/*:)*/
-                     {
-                        move(row, col, rsel, csel);
-                        turn = !turn;
-                        WKORM = true;
-                     }
-                  }
-                  else if (WIC && WhichPieceIsCheckingWhite(wkr, wkc).getType() == 4)
-                  {
-                     if (living[row][col] == WhichPieceIsCheckingWhite(wkr, wkc))/*:)*/
-                     {
-                        move(row, col, rsel, csel);
-                        turn = !turn;
-                        WKORM = true;
-                     }
-                  }
-                  else
-                  {
-                     occupied[rsel][csel] = 0;
-                        if (WhiteInCheck(wkr, wkc))
-                        {
-                           int hold = occupied[row][col];
-                           occupied[row][col] = 1;
-                           
-                           if(WhiteInCheck(wkr, wkc))
-                           {
-                              occupied[rsel][csel] = 1;
-                              occupied[row][col] = hold;
-                              turn = ! turn;
-                           }
-                           
-                           else 
-                           {
-                              occupied[rsel][csel] = 1;
-                              occupied[row][col] = hold;
-                              move(row, col, rsel, csel); 
-                              WKORM = true;
-                           }
-                        }
-                        else
-                        {
-                           occupied[rsel][csel] = 1;
-                           move(row, col, rsel, csel); 
-                           WKORM = true;
-                        }
-                        turn = !turn;
-                  } /////// for white
-               }
-            }
-            
-            else if (living[rsel][csel].getType() == 8)// black rook
-            {
-               if (living[rsel][csel].canMove(row, col) && occupied[row][col] != 2 && NoPieceBetween(row, col, rsel, csel)&& (row!=wkr || col!=wkc))
-               {
-
-                  
-                  if(BIC && HowManyCheckingBlack(bkr, bkc) == 2)
-                  {
-                  }
-                  else if (BIC && WhichPieceIsCheckingBlack(bkr, bkc).getType() != 3)
-                  {
-                     if (living[row][col] == WhichPieceIsCheckingBlack(bkr, bkc) || BlockACheck(bkr, bkc, WhichPieceIsCheckingBlack(bkr, bkc).getRow(),  WhichPieceIsCheckingBlack(bkr, bkc).getCol(), row, col))/*:)*/
-                     {
-                        move(row, col, rsel, csel); 
-                        turn = !turn;
-                        BKORM = true;
-                     }
-                  }
-                  else if (BIC && WhichPieceIsCheckingBlack(bkr, bkc).getType() == 3)
-                  {
-                     if (living[row][col] == WhichPieceIsCheckingBlack(bkr, bkc))/*:)*/
-                     {
-                        move(row, col, rsel, csel); 
-                        turn = !turn;
-                        BKORM = true;
-                     }
-                  }
-                  else
-                  {
-                     occupied[rsel][csel] = 0;
-                        if (BlackInCheck(bkr, bkc))
-                        {
-                           int hold = occupied[row][col];
-                           occupied[row][col] = 2;
-                           
-                           if(BlackInCheck(bkr, bkc))
-                           {
-                              occupied[rsel][csel] = 2;
-                              occupied[row][col] = hold;
-                              turn = ! turn;
-                           }
-                           
-                           else 
-                           {
-                              occupied[rsel][csel] = 2;
-                              occupied[row][col] = hold;
-                              move(row, col, rsel, csel); 
-                              BKORM = true;
-                           }
-                        }
-                        else
-                        {
-                           occupied[rsel][csel] = 2;
-                           move(row, col, rsel, csel); 
-                           BKORM = true;
-                        }
-                        turn = !turn;
-                  }
-               }
-            }
-            
-            else if (living[rsel][csel].getType() == 5)// white bishop
-            {
-               if (living[rsel][csel].canMove(row, col) && occupied[row][col] != 1 && NoPieceBetween(row, col, rsel, csel) &&( row!=bkr || col!=bkc))
-               {
-
-                  if (WIC && HowManyCheckingWhite(wkr, wkc) == 2)
-                  {
-                  }
-                  else if (WIC && WhichPieceIsCheckingWhite(wkr, wkc).getType() != 4)//////for white
-                  {
-                     if (living[row][col] == WhichPieceIsCheckingWhite(wkr, wkc) || BlockACheck(wkr, wkc, WhichPieceIsCheckingWhite(wkr, wkc).getRow(),  WhichPieceIsCheckingWhite(wkr, wkc).getCol(), row, col))/*:)*/
-                     {
-                        move(row, col, rsel, csel);
-                        turn = !turn;
-                     }
-                  }
-                  else if (WIC && WhichPieceIsCheckingWhite(wkr, wkc).getType() == 4)
-                  {
-                     if (living[row][col] == WhichPieceIsCheckingWhite(wkr, wkc))/*:)*/
-                     {
-                        move(row, col, rsel, csel);
-                        turn = !turn;
-                     }
-                  }
-                  else
-                  {
-                     occupied[rsel][csel] = 0;
-                        if (WhiteInCheck(wkr, wkc))
-                        {
-                           int hold = occupied[row][col];
-                           occupied[row][col] = 1;
-                           
-                           if(WhiteInCheck(wkr, wkc))
-                           {
-                              occupied[rsel][csel] = 1;
-                              occupied[row][col] = hold;
-                              turn = ! turn;
-                           }
-                           
-                           else 
-                           {
-                              occupied[rsel][csel] = 1;
-                              occupied[row][col] = hold;
-                              move(row, col, rsel, csel); 
-                           }
-                        }
-                        else
-                        {
-                           occupied[rsel][csel] = 1;
-                           move(row, col, rsel, csel); 
-                        }
-                        turn = !turn;
-                  } /////// for white
-               }
-            }
-            
-            else if (living[rsel][csel].getType() == 6)// black bishop
-            {
-               if (living[rsel][csel].canMove(row, col) && occupied[row][col] != 2 && NoPieceBetween(row, col, rsel, csel)&& (row!=wkr || col!=wkc))
-               {
-
-                  
-                  if(BIC && HowManyCheckingBlack(bkr, bkc) == 2)
-                  {
-                  }
-                  else if (BIC && WhichPieceIsCheckingBlack(bkr, bkc).getType() != 3)
-                  {
-                     if (living[row][col] == WhichPieceIsCheckingBlack(bkr, bkc) || BlockACheck(bkr, bkc, WhichPieceIsCheckingBlack(bkr, bkc).getRow(),  WhichPieceIsCheckingBlack(bkr, bkc).getCol(), row, col))/*:)*/
-                     {
-                        move(row, col, rsel, csel); 
-                        turn = !turn;
-                     }
-                  }
-                  else if (BIC && WhichPieceIsCheckingBlack(bkr, bkc).getType() == 3)
-                  {
-                     if (living[row][col] == WhichPieceIsCheckingBlack(bkr, bkc))/*:)*/
-                     {
-                        move(row, col, rsel, csel); 
-                        turn = !turn;
-                     }
-                  }
-                  else
-                  {
-                     occupied[rsel][csel] = 0;
-                        if (BlackInCheck(bkr, bkc))
-                        {
-                           int hold = occupied[row][col];
-                           occupied[row][col] = 2;
-                           
-                           if(BlackInCheck(bkr, bkc))
-                           {
-                              occupied[rsel][csel] = 2;
-                              occupied[row][col] = hold;
-                              turn = ! turn;
-                           }
-                           
-                           else 
-                           {
-                              occupied[rsel][csel] = 2;
-                              occupied[row][col] = hold;
-                              move(row, col, rsel, csel); 
-                           }
-                        }
-                        else
-                        {
-                           occupied[rsel][csel] = 2;
-                           move(row, col, rsel, csel); 
-                        }
-                        turn = !turn;
-                  }
-               }
-            }
-            
-            else if (living[rsel][csel].getType() == 10) // black queen
-            {
-               if (living[rsel][csel].canMove(row, col) && occupied[row][col] != 2 && NoPieceBetween(row, col, rsel, csel)&& (row!=wkr || col!=wkc))
-               {
-
-                  if(BIC && HowManyCheckingBlack(bkr, bkc) == 2)
-                  {
-                  }
-                  else if (BIC && WhichPieceIsCheckingBlack(bkr, bkc).getType() != 3)
-                  {
-                     if (living[row][col] == WhichPieceIsCheckingBlack(bkr, bkc) || BlockACheck(bkr, bkc, WhichPieceIsCheckingBlack(bkr, bkc).getRow(),  WhichPieceIsCheckingBlack(bkr, bkc).getCol(), row, col))/*:)*/
-                     {
-                        move(row, col, rsel, csel); 
-                        turn = !turn;
-                     }
-                  }
-                  else if (BIC && WhichPieceIsCheckingBlack(bkr, bkc).getType() == 3)
-                  {
-                     if (living[row][col] == WhichPieceIsCheckingBlack(bkr, bkc))/*:)*/
-                     {
-                        move(row, col, rsel, csel); 
-                        turn = !turn;
-                     }
-                  }
-                  else
-                  {
-                     occupied[rsel][csel] = 0;
-                        if (BlackInCheck(bkr, bkc))
-                        {
-                           int hold = occupied[row][col];
-                           occupied[row][col] = 2;
-                           
-                           if(BlackInCheck(bkr, bkc))
-                           {
-                              occupied[rsel][csel] = 2;
-                              occupied[row][col] = hold;
-                              turn = ! turn;
-                           }
-                           
-                           else 
-                           {
-                              occupied[rsel][csel] = 2;
-                              occupied[row][col] = hold;
-                              move(row, col, rsel, csel); 
-                           }
-                        }
-                        else
-                        {
-                           occupied[rsel][csel] = 2;
-                           move(row, col, rsel, csel); 
-                        }
-                        turn = !turn;
-                  }
-               }
-            }
-            
-            else if (living[rsel][csel].getType() == 9) // white queen
-            {
-               if (living[rsel][csel].canMove(row, col) && occupied[row][col] != 1 && NoPieceBetween(row, col, rsel, csel)&& (row!=bkr || col!=bkc))
-               {
-
-                  
-                  if (WIC && HowManyCheckingWhite(wkr, wkc) == 2)
-                  {
-                  }
-                  
-                  else if (WIC && WhichPieceIsCheckingWhite(wkr, wkc).getType() != 4)//////for white
-                  {
-                     if (living[row][col] == WhichPieceIsCheckingWhite(wkr, wkc) || BlockACheck(wkr, wkc, WhichPieceIsCheckingWhite(wkr, wkc).getRow(),  WhichPieceIsCheckingWhite(wkr, wkc).getCol(), row, col))/*:)*/
-                     {
-                        move(row, col, rsel, csel);
-                        turn = !turn;
-                     }
-                  }
-                  else if (WIC && WhichPieceIsCheckingWhite(wkr, wkc).getType() == 4)
-                  {
-                     if (living[row][col] == WhichPieceIsCheckingWhite(wkr, wkc))/*:)*/
-                     {
-                        move(row, col, rsel, csel);
-                        turn = !turn;
-                     }
-                  }
-                  else
-                  {
-                     occupied[rsel][csel] = 0;
-                     
-                        if (WhiteInCheck(wkr, wkc))
-                        {
-                           int hold = occupied[row][col];
-                           occupied[row][col] = 1;
-                           
-                           if(WhiteInCheck(wkr, wkc))
-                           {
-                              occupied[rsel][csel] = 1;
-                              occupied[row][col] = hold;
-                              turn = ! turn;
-                           }
-                           
-                           else 
-                           {
-                              occupied[rsel][csel] = 1;
-                              occupied[row][col] = hold;
-                              move(row, col, rsel, csel); 
-                           }
-                        }
-                        else
-                        {
-                           occupied[rsel][csel] = 1;
-                           move(row, col, rsel, csel); 
-                        }
-                        turn = !turn;
-                  } 
-               }
-            }
-            
-            else if (living[rsel][csel].getType() == 11) // white king
-            {
-               if ((row == 7 && col == 6 && !WKORM && !WhiteInCheck(wkr, wkc) && occupied[7][5] == 0 && occupied[7][6] == 0 && !WhiteInCheck(7, 6) && !WhiteInCheck(7, 5)) )
-               {
-                  move(row, col, rsel, csel); 
-                     turn = !turn;
-                     wkc = col;
-                     wkr = row;
-                     WKORM = true;
-                     move(row, col-1, 7,7);
-               }
-               else if (row == 7 && col == 2 && !WKORM && !WhiteInCheck(wkr, wkc) && occupied[7][1] == 0 && occupied[7][2] == 0 && occupied[7][3] == 0 && !WhiteInCheck(7, 1) && !WhiteInCheck(7, 2) && !WhiteInCheck(7, 3))
-               {
-                  move(row, col, rsel, csel); 
-                     turn = !turn;
-                     wkc = col;
-                     wkr = row;
-                     WKORM = true;
-                     move(row, col+1, 7,0);
-               }
-               else if (living[rsel][csel].canMove(row, col) && occupied[row][col] != 1&& (row!=bkr || col!=bkc))
-               {
-
-                  if (WhiteInCheck(row, col) == false)
-                  {
-                     move(row, col, rsel, csel); 
-                     turn = !turn;
-                     wkc = col;
-                     wkr = row;
-                     WKORM = true;
-                  }
-               }
-               
-            }
-            
-            else                                       // black king
-            {
-               if ((row == 0 && col == 6 && !BKORM && !BlackInCheck(bkr, bkc) && occupied[0][5] == 0 && occupied[0][6] == 0 && !BlackInCheck(0, 6) && !BlackInCheck(0, 5)) )
-               {
-                  move(row, col, rsel, csel); 
-                     turn = !turn;
-                     bkc = col;
-                     bkr = row;
-                     BKORM = true;
-                     move(row, col-1, 0,7);
-               }
-               else if (row == 0 && col == 2 && !BKORM && !BlackInCheck(bkr, bkc) && occupied[0][1] == 0 && occupied[0][2] == 0 && occupied[0][3] == 0 && !BlackInCheck(0, 1) && !BlackInCheck(0, 2) && !BlackInCheck(0, 3))
-               {
-                  move(row, col, rsel, csel); 
-                     turn = !turn;
-                     bkc = col;
-                     bkr = row;
-                     BKORM = true;
-                     move(row, col+1, 0,0);
-               }
-               else if (living[rsel][csel].canMove(row, col) && occupied[row][col] != 2&& (row!=wkr || col!=wkc))
-               {
-
-                  if(BlackInCheck(row, col) == false)
-                  {
-                     move(row, col, rsel, csel); 
-                     turn = !turn;
-                     bkc = col;
-                     bkr = row;
-                     BKORM = true;
-                  }
-               }
-               
             }
             
             ////////////////////////////////////////////////////////////////
             /* moving finsihed */
             //////////////////////////////////////////////////////////////////
-            if (BlackInCheck(bkr, bkc))
-            {
+            if (BlackInCheck(bkr, bkc)){
                if (board[bkr][bkc].getBackground() != Color.red)
                previous2 = board[bkr][bkc].getBackground();
                board[bkr][bkc].setBackground(Color.red);
                bcheckr =bkr;
                bcheckc = bkc;
             }
-            else
-            {
+            else{
                if (board[bcheckr][bcheckc].getBackground() == Color.red)
                board[bcheckr][bcheckc].setBackground(previous2);
             }
             
-            if (WhiteInCheck(wkr, wkc))
-            {
+            if (WhiteInCheck(wkr, wkc)){
         
                if (board[wkr][wkc].getBackground() != Color.red)
                previous3 = board[wkr][wkc].getBackground();
@@ -828,15 +301,13 @@ public class Chess extends JPanel {
                wcheckr = wkr;
                wcheckc = wkc;
             }
-            else 
-            {
+            else {
                if (board[wcheckr][wcheckc].getBackground() == Color.red)
                board[wcheckr][wcheckc].setBackground(previous3);
             }   
             
          }
       
-         
          if (CheckOrStaleMate(turn) != 0)
          {
             for (int Tae = 0; Tae < 8; Tae ++)
@@ -860,34 +331,24 @@ public class Chess extends JPanel {
          }
       }
    }  
-   
-   
-   
-   
-   //////////////////////////////////////////
-   //END OF ACTION LISTENER
-   /////////////////////////////////////////
-   
-   
-   
-   
-   public boolean BlackInCheck(int r, int c)
-   {
+
+   //////////////////////////////////////////////////////////////////////////////////
+   //////////////////////////////////////////////////////////////////////////////////
+   //HELPER METHODS
+   //////////////////////////////////////////////////////////////////////////////////
+   //////////////////////////////////////////////////////////////////////////////////
+
+   public boolean BlackInCheck(int r, int c){
    occupied[bkr][bkc] = 0;
       boolean check = false;
-      for (int i = 0; i < 8; i++)
-      {
-         for (int q = 0; q < 8; q++)
-         {
-            if (occupied[i][q] == 1) // if piece is white
-            {
-               if (living[i][q].getType() == 1)
-               {
+      for (int i = 0; i < 8; i++){
+         for (int q = 0; q < 8; q++){
+            if (occupied[i][q] == 1){ // if piece is white
+               if (living[i][q].getType() == 1){
                   if (living[i][q].canCapture(r, c) == true && NoPieceBetween(i, q, r, c) == true)
                   check = true;
                }
-               else
-               {
+               else{
                   if (living[i][q].canMove(r, c) == true && NoPieceBetween(i, q, r, c) == true)
                   check = true;
                }
@@ -898,23 +359,17 @@ public class Chess extends JPanel {
       return check;
    }
    
-   public boolean WhiteInCheck(int r, int c)
-   {
+   public boolean WhiteInCheck(int r, int c){
       boolean check = false;
       occupied[wkr][wkc] = 0;
-      for (int i = 0; i < 8; i++)
-      {
-         for (int q = 0; q < 8; q++)
-         {
-            if (occupied[i][q] == 2) // if piece is black
-            {
-               if (living[i][q].getType() == 2)
-               {
+      for (int i = 0; i < 8; i++){
+         for (int q = 0; q < 8; q++){
+            if (occupied[i][q] == 2){ // if piece is black
+               if (living[i][q].getType() == 2){
                   if (living[i][q].canCapture(r, c) == true && NoPieceBetween(i, q, r, c) == true)
                   check = true;
                }
-               else
-               {
+               else{
                   if (living[i][q].canMove(r, c) == true && NoPieceBetween(i, q, r, c) == true)
                   check = true;
                }
@@ -928,97 +383,67 @@ public class Chess extends JPanel {
    
    
    
-   /////////////////////////////////////////////
-   //no piece between
-   
-   public boolean NoPieceBetween(int r, int c, int rsel, int csel)
-   {
-      if (r == rsel) // horizontal 
-      {
-         if (c > csel + 1) //moves left
-         {
-            for (int i = csel+1; i < c; i++)
-            {
-               if (occupied[r][i] != 0)
-               return false;
+
+   public boolean NoPieceBetween(int r, int c, int rsel, int csel){
+      if (r == rsel){ // horizontal 
+         if (c > csel + 1){ //moves left
+            for (int i = csel+1; i < c; i++){
+               if (occupied[r][i] != 0) return false;
             }
          }
-         else //move right
-         {
-            for (int i = csel-1; i > c; i--)
-            {
-               if (occupied[r][i] != 0)
-               return false;
+         else{ //move right
+            for (int i = csel-1; i > c; i--){
+               if (occupied[r][i] != 0) return false;
             }
          }
       }
       
-      else if (c == csel) // vertical
-      {
-         if (r > rsel + 1) //moves up
-         {
-            for (int i = rsel+1; i < r; i++)
-            {
-               if (occupied[i][c] != 0)
-               return false;
+      else if (c == csel){ // vertical
+         if (r > rsel + 1){ //moves up
+            for (int i = rsel+1; i < r; i++){
+               if (occupied[i][c] != 0) return false;
             }
          }
-         else //move rdown
-         {
-            for (int i = rsel-1; i > r; i--)
-            {
-               if (occupied[i][c] != 0)
-               return false;
+         else{ //move rdown
+            for (int i = rsel-1; i > r; i--){
+               if (occupied[i][c] != 0) return false;
             }
          }
       }
       
-      else //diagonal
-      {
-         if (rsel+1 < r && csel -1 > c) // up  and right
-         {
-            for (int i = r-1; i > rsel; i --)
-            {
-               for (int p = c+1; p < csel; p++)
-               {
+      else{ //diagonal
+         if (rsel+1 < r && csel -1 > c){ // up  and right
+            for (int i = r-1; i > rsel; i --){
+               for (int p = c+1; p < csel; p++){
                   if (Math.abs(p - c) == Math.abs(i - r) && occupied[i][p] != 0)
-                  return false;
+                     return false;
                }
             }
          }
          
-         else if (rsel+1 < r  && csel + 1 < c) // up and left
-         {
-            for (int i = r-1; i > rsel; i --)
-            {
-               for (int p = c-1; p > csel; p--)
-               {
+         else if (rsel+1 < r  && csel + 1 < c){ // up and left
+            for (int i = r-1; i > rsel; i --){
+               for (int p = c-1; p > csel; p--){
                   if (Math.abs(p - csel) == Math.abs(i - rsel) && occupied[i][p] != 0)
-                  return false;
+                     return false;
                }
             }
          }
          
-         else if (rsel-1 > r && csel -1 > c) // down and right
-         {
-            for (int i = r + 1; i < rsel; i++)
-            {
-               for (int p = c +1; p < csel; p++)
-               {
+         else if (rsel-1 > r && csel -1 > c){ // down and right
+            for (int i = r + 1; i < rsel; i++){
+               for (int p = c +1; p < csel; p++){
                   if (Math.abs(p - csel) == Math.abs(i - rsel) && occupied[i][p] != 0)
-                  return false;
+                     return false;
                }
             }
          }
          
-         else // down and left
-         {
-            for (int i = r+1; i < rsel; i++)
-            {
-               for (int p = c-1; p > csel; p--)
-               {
+         else{ // down and left
+            for (int i = r+1; i < rsel; i++){
+               for (int p = c-1; p > csel; p--){
                   if (Math.abs(p - csel) == Math.abs(i - rsel) && occupied[i][p] != 0)
-                  return false;
+                     return false;
                }
             }
          }
