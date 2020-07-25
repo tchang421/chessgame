@@ -195,7 +195,7 @@ public class Chess extends JPanel {
             //////////////////////////////////////////////////////////////////
             //CHECKING FOR CHECKMATE OR STALEMATE
             //////////////////////////////////////////////////////////////////
-            if (!turn && BlackInCheck(bkr, bkc)){
+            if (!turn && inCheck(bkr, bkc, 1)){
                if (board[bkr][bkc].getBackground() != Color.red)
                   previous2 = board[bkr][bkc].getBackground();
                board[bkr][bkc].setBackground(Color.red);
@@ -207,7 +207,7 @@ public class Chess extends JPanel {
                   board[bcheckr][bcheckc].setBackground(previous2);
             }
             
-            if (turn && WhiteInCheck(wkr, wkc)){
+            if (turn && inCheck(wkr, wkc, 2)){
                if (board[wkr][wkc].getBackground() != Color.red)
                   previous3 = board[wkr][wkc].getBackground();
                board[wkr][wkc].setBackground(Color.red);
@@ -246,7 +246,7 @@ public class Chess extends JPanel {
             
             pieces temp = living[row][col];
             move(row, col, rsel, csel);
-            if (WhiteInCheck(wkr, wkc)&&turn || BlackInCheck(bkr, bkc)&&!turn){
+            if (inCheck(wkr, wkc, 2) && turn || inCheck(bkr, bkc, 1) && !turn){
                //RESET THE OLD SPACE
                living[row][col].setLocation(rsel, csel);
                living[rsel][csel] = living[row][col];
@@ -296,7 +296,7 @@ public class Chess extends JPanel {
             bkc = col;
          }
          move(row, col, rsel, csel);
-         if (WhiteInCheck(wkr, wkc) && turn || BlackInCheck(bkr, bkc) && !turn){
+         if (inCheck(wkr, wkc, 2) && turn || inCheck(bkr, bkc, 1) && !turn){
             if (row == wkr && col == wkc){
                wkr = rsel; 
                wkc = csel;
@@ -326,33 +326,17 @@ public class Chess extends JPanel {
       }
    }
 
-   public boolean BlackInCheck(int r, int c){
+   public boolean inCheck(int r, int c, int color){
       for (int i = 0; i < 8; i++){
          for (int q = 0; q < 8; q++){
-            if (occupied[i][q] == 1){ //IF PIECE IS WHITE
-               if (living[i][q].canCapture(r, c) == true && NoPieceBetween(i, q, r, c) == true)
-                  return true;
-            }
+            if (occupied[i][q] == color && living[i][q].canCapture(r, c) && NoPieceBetween(i, q, r, c))
+               return true;
+            
          }
       }
       return false;
    }
    
-   public boolean WhiteInCheck(int r, int c){
-      for (int i = 0; i < 8; i++){
-         for (int q = 0; q < 8; q++){
-            if (occupied[i][q] == 2){ //IF PIECE IS BLACK
-               if (living[i][q].canCapture(r, c) == true && NoPieceBetween(i, q, r, c) == true)
-                  return true;
-            }
-         }
-      }
-      return false;
-   }
-   
-   
-   
-
    public boolean NoPieceBetween(int r, int c, int rsel, int csel){
       if (r == rsel){ // horizontal 
          if (c > csel + 1){ //moves left
@@ -431,149 +415,38 @@ public class Chess extends JPanel {
       board[rsel][csel].setIcon(null);
    }
    
-   
-   
-   
-   
-   ///////////////////////////////////////////////////
-   // checking hiw many and which pieces are checking kings
-   ///////////////////////////////////////////////////
-   
-   
-   
-   public int HowManyCheckingWhite(int r, int c)
-   {
+   public int howManyChecking(int r, int c, int color){
       int count = 0;
-      for (int i = 0; i < 8; i++)
-      {
-         for (int q = 0; q < 8; q++)
-         {
-            if (occupied[i][q] == 2) // if piece is black
-            {
-               if (living[i][q].getType() == 2)
-               {
-                  if (living[i][q].canCapture(r, c) == true && NoPieceBetween(i, q, r, c) == true)
-                  count ++;
-               }
-               else
-               {
-                  if (living[i][q].canMove(r, c) == true && NoPieceBetween(i, q, r, c) == true)
-                  count++;
-               }
-            }
+      for (int i = 0; i < 8; i++){
+         for (int q = 0; q < 8; q++){
+            if (occupied[i][q] == color && living[i][q].canCapture(r, c) == true 
+                                       && NoPieceBetween(i, q, r, c) == true)
+               count++; 
          }
       }
       return count;
    }
-   
-   public int HowManyCheckingBlack(int r, int c)
-   {
-      int count = 0;
-      for (int i = 0; i < 8; i++)
-      {
-         for (int q = 0; q < 8; q++)
-         {
-            if (occupied[i][q] == 1) //if White
-            {
-               if (living[i][q].getType() == 1)
-               {
-                  if (living[i][q].canCapture(r, c) == true && NoPieceBetween(i, q, r, c) == true)
-                  count ++;
-               }
-               else
-               {
-                  if (living[i][q].canMove(r, c) == true && NoPieceBetween(i, q, r, c) == true)
-                  count++;
-               }
+
+   public boolean BlockACheck(int r, int c, int rsel, int csel, int movedr, int movedc){
+      if (r == rsel && r == movedr){ // horizontal 
+         if (c > csel + 1){ //moves left
+            for (int i = csel+1; i < c; i++){
+               if (i == movedc) return true;
+            }
+         }
+         else{ //move right
+            for (int i = csel-1; i > c; i--){
+               if (i == movedc) return true;
             }
          }
       }
-      return count;
-   }
-   
-   
-   public pieces WhichPieceIsCheckingWhite(int r, int c)
-   {
-      for (int i = 0; i < 8; i++)
-      {
-         for (int q = 0; q < 8; q++)
-         {
-            if (occupied[i][q] == 2) // if piece is black
-            {
-               if (living[i][q].getType() == 2)
-               {
-                  if (living[i][q].canCapture(r, c) == true && NoPieceBetween(i, q, r, c) == true)
-                  return living[i][q];
-               }
-               else
-               {
-                  if (living[i][q].canMove(r, c) == true && NoPieceBetween(i, q, r, c) == true)
-                  return living[i][q];
-               }
-            }
-         }
-      }
-      return null;
-   }
-   
-   public pieces WhichPieceIsCheckingBlack(int r, int c)
-   {
-      for (int i = 0; i < 8; i++)
-      {
-         for (int q = 0; q < 8; q++)
-         {
-            if (occupied[i][q] == 1) // if piece is white
-            {
-               if (living[i][q].getType() == 1)
-               {
-                  if (living[i][q].canCapture(r, c) == true && NoPieceBetween(i, q, r, c) == true)
-                  return living[i][q];
-               }
-               else
-               {
-                  if (living[i][q].canMove(r, c) == true && NoPieceBetween(i, q, r, c) == true)
-                  return living[i][q];
-               }
-            }
-         }
-      }
-      return null;
-   }
-   
-   
-   
-   
-   
-   
-   
-   
-   
-   //////////////////////////////////////////////////////////////////
-   
-   /////////////////////////////////////////////////////////////////
-   
-   
-   
-      public boolean BlockACheck(int r, int c, int rsel, int csel, int movedr, int movedc){
-         if (r == rsel && r == movedr){ // horizontal 
-            if (c > csel + 1){ //moves left
-               for (int i = csel+1; i < c; i++){
-                  if (i == movedc) return true;
-               }
-            }
-            else{ //move right
-               for (int i = csel-1; i > c; i--){
-                  if (i == movedc) return true;
-               }
-            }
-         }
       
-         else if (c == csel && c == movedc){ // vertical
-            if (r > rsel + 1){ //moves up
-               for (int i = rsel+1; i < r; i++){
-                  if (i == movedr) return true;
-               }
+      else if (c == csel && c == movedc){ // vertical
+         if (r > rsel + 1){ //moves up
+            for (int i = rsel+1; i < r; i++){
+               if (i == movedr) return true;
             }
+         }
          else{ //move rdown
             for (int i = rsel-1; i > r; i--){
                if (i == movedr) return true;
@@ -618,7 +491,6 @@ public class Chess extends JPanel {
             }
          }
       }
-      
       return false;
    }
 
@@ -627,28 +499,20 @@ public class Chess extends JPanel {
    }
     
    public boolean insufficientMat(){
-   int white = 0;
-   int black = 0;
-      for (int r = 0; r < 8; r ++)
-            {
-               for (int c = 0; c < 8; c ++)
-               {
-                 if (occupied[r][c] == 1 && living[r][c].getType() != 1 && living[r][c].getType() != 7 && living[r][c].getType() != 9 && living[r][c].getType() != 11)
-                 {
-                  white = white + living[r][c].getType();
-                 }
-                 else if (occupied[r][c] == 2 && living[r][c].getType() != 2 && living[r][c].getType() != 8 && living[r][c].getType() != 10 && living[r][c].getType() != 12)
-                 {
-                  black = black + living[r][c].getType();
-
-                 }
-               }
-            }
-            if ((white == 3 || white == 5) && (black == 4 && black == 6))
-            return true;
+      int white = 0;
+      int black = 0;
+      for (int r = 0; r < 8; r ++){
+         for (int c = 0; c < 8; c ++){
+            if (occupied[r][c] == 1 && living[r][c].getType() != 1 && living[r][c].getType() != 7 && living[r][c].getType() != 9 && living[r][c].getType() != 11)
+               white = white + living[r][c].getType();
+            else if (occupied[r][c] == 2 && living[r][c].getType() != 2 && living[r][c].getType() != 8 && living[r][c].getType() != 10 && living[r][c].getType() != 12)
+               black = black + living[r][c].getType();
+         }
+      }
+      if ((white == 3 || white == 5) && (black == 4 && black == 6))
+         return true;
       return false;
    }
-   
 
    private class Exit implements ActionListener{    
       public void actionPerformed(ActionEvent click){
