@@ -160,14 +160,10 @@ public class Chess extends JPanel {
       /////////////////////////////////////////////////////
          
       public void actionPerformed(ActionEvent PieceSelection){
-         // CHECKING IF A KING IS IN CHECK
-         WIC = false;
-         BIC = false;
-
-         if (turn && WhiteInCheck(wkr, wkc)) WIC = true;
-         if ((!turn) && BlackInCheck(bkr, bkc)) BIC = true;
-         
-         if (!selected){ //NOTHING IS SELECTED YET, SO HIGHLIGHT THE SQUARE
+         ///////////////////////////////////////////////////////////////////////
+         //SELECTING A PIECE
+         ///////////////////////////////////////////////////////////////////////      
+         if (!selected){
             if ((occupied[row][col] == 1 && turn) || (occupied[row][col] == 2 && !turn)){
                selected = true;
                rsel = row;
@@ -176,76 +172,23 @@ public class Chess extends JPanel {
                board[row][col].setBackground(Color.yellow); 
             }
          }
-         else if (selected && rsel == row && csel == col){ //UNSELECT A PIECE
+         ///////////////////////////////////////////////////////////////////////
+         //UNSELECTING A PIECE
+         ///////////////////////////////////////////////////////////////////////  
+         else if (selected && rsel == row && csel == col){ 
             selected = false;
             board[rsel][csel].setBackground(previous);
          }
+         ///////////////////////////////////////////////////////////////////////
+         //MOVING SELECTED PIECE
+         /////////////////////////////////////////////////////////////////////// 
          else{
-            ///////////////////////////////////////////////////////////////////////
-            ///////////////////////////////////////////////////////////////////////
-            //MOVING THE SELECTED PIECE
-            ///////////////////////////////////////////////////////////////////////
-            ///////////////////////////////////////////////////////////////////////
             selected = false;
             board[rsel][csel].setBackground(previous); 
-
-            if (living[rsel][csel].getType() <= 2){ //PAWN
-               if (occupied[row][col] != occupied[rsel][csel] && occupied[row][col] != 0
-                        && living[rsel][csel].canCapture(row, col) 
-                        && (row!=bkr || col!=bkc) && (row!=wkr || col!=wkc)){ //FOR CAPTURING
-                  
-                  pieces temp = living[row][col];
-                  move(row, col, rsel, csel);
-                  if (WhiteInCheck(wkr, wkc)&&turn || BlackInCheck(bkr, bkc)&&!turn){
-                     //RESET THE OLD SPACE
-                     living[row][col].setLocation(rsel, csel);
-                     living[rsel][csel] = living[row][col];
-                     occupied[rsel][csel] = living[rsel][csel].getColor();
-                     board[rsel][csel].setIcon(board[row][col].getIcon());
-                     //RESET THE CAPTURED SPACE
-                     living[row][col] = temp;
-                     occupied[row][col] = temp.getColor();
-                     board[row][col].setIcon(imageArray[temp.getType()-1]);
-                  }
-                  else{
-                     if (turn && row == 0){
-                        living[row][col] = new  queen(row, col, 1, 9);
-                        board[row][col].setIcon(imageArray[8]);
-                     }
-                     else if (!turn && row == 7){
-                        living[row][col] = new  queen(row, col, 2, 10);
-                        board[row][col].setIcon(imageArray[9]);
-                     }
-                     turn = !turn;
-                  }
-               }
-               else if (occupied[row][col] == 0 && living[rsel][csel].canMove(row, col)){
-                  move(row, col, rsel, csel);
-                  if (WhiteInCheck(wkr, wkc) && turn || BlackInCheck(bkr, bkc) && !turn){
-                     //RESET THE OLD SPACE
-                     living[row][col].setLocation(rsel, csel);
-                     living[rsel][csel] = living[row][col];
-                     occupied[rsel][csel] = living[rsel][csel].getColor();
-                     board[rsel][csel].setIcon(board[row][col].getIcon());
-                     //RESET THE CAPTURED SPACE
-                     living[row][col] = null;
-                     occupied[row][col] = 0;
-                     board[row][col].setIcon(null);
-                  }
-                  else{
-                     if (turn && row == 0){
-                        living[row][col] = new  queen(row, col, 1, 9);
-                        board[row][col].setIcon(imageArray[8]);
-                     }
-                     else if (!turn && row == 7){
-                        living[row][col] = new  queen(row, col, 2, 10);
-                        board[row][col].setIcon(imageArray[9]);
-                     }
-                     turn = !turn;
-                  }
-               } 
-            }
             
+            if (living[rsel][csel].getType() <= 2)
+               movePawn(row, col);
+
             else if (living[rsel][csel].getType() >= 3){ // NOT PAWN PIECES
                if (occupied[row][col] != occupied[rsel][csel] 
                      && living[rsel][csel].canMove(row, col)
@@ -278,8 +221,8 @@ public class Chess extends JPanel {
                }
             }
             
-            ////////////////////////////////////////////////////////////////
-            /* moving finsihed */
+            //////////////////////////////////////////////////////////////////
+            //CHECKING FOR CHECKMATE OR STALEMATE
             //////////////////////////////////////////////////////////////////
             if (BlackInCheck(bkr, bkc)){
                if (board[bkr][bkc].getBackground() != Color.red)
@@ -303,28 +246,22 @@ public class Chess extends JPanel {
             }
             else {
                if (board[wcheckr][wcheckc].getBackground() == Color.red)
-               board[wcheckr][wcheckc].setBackground(previous3);
+                  board[wcheckr][wcheckc].setBackground(previous3);
             }   
             
          }
       
-         if (CheckOrStaleMate(turn) != 0)
-         {
-            for (int Tae = 0; Tae < 8; Tae ++)
-            {
-               for (int TAE = 0; TAE < 8; TAE ++)
-               {
+         if (CheckOrStaleMate(turn) != 0){
+            for (int Tae = 0; Tae < 8; Tae ++){
+               for (int TAE = 0; TAE < 8; TAE ++){
                   board[Tae][TAE].setEnabled(false);
                }
             }
          }
          
-         if (InsMat())
-         {
-            for (int Tae = 0; Tae < 8; Tae ++)
-            {
-               for (int TAE = 0; TAE < 8; TAE ++)
-               {
+         if (InsMat()){
+            for (int Tae = 0; Tae < 8; Tae ++){
+               for (int TAE = 0; TAE < 8; TAE ++){
                   board[Tae][TAE].setEnabled(false);
                }
             }
@@ -338,10 +275,52 @@ public class Chess extends JPanel {
    //////////////////////////////////////////////////////////////////////////////////
    //////////////////////////////////////////////////////////////////////////////////
 
+   public void movePawn(int row, int col){
+      if (living[rsel][csel].getType() <= 2){ //PAWN
+         if ((occupied[row][col] != occupied[rsel][csel] && occupied[row][col] != 0 
+                  && living[rsel][csel].canCapture(row, col))
+                  || (occupied[row][col] == 0 && living[rsel][csel].canMove(row, col))
+                  && (row!=bkr || col!=bkc) && (row!=wkr || col!=wkc)){ 
+            
+            pieces temp = living[row][col];
+            move(row, col, rsel, csel);
+            if (WhiteInCheck(wkr, wkc)&&turn || BlackInCheck(bkr, bkc)&&!turn){
+               //RESET THE OLD SPACE
+               living[row][col].setLocation(rsel, csel);
+               living[rsel][csel] = living[row][col];
+               occupied[rsel][csel] = living[rsel][csel].getColor();
+               board[rsel][csel].setIcon(board[row][col].getIcon());
+               //RESET THE CAPTURED SPACE
+               if (temp != null){
+                  living[row][col] = temp;
+                  occupied[row][col] = temp.getColor();
+                  board[row][col].setIcon(imageArray[temp.getType()-1]);
+               }
+               else{
+                  living[row][col] = null;
+                  occupied[row][col] = 0;
+                  board[row][col].setIcon(null);
+               }
+            }
+            else{
+               if (turn && row == 0){
+                  living[row][col] = new  queen(row, col, 1, 9);
+                  board[row][col].setIcon(imageArray[8]);
+               }
+               else if (!turn && row == 7){
+                  living[row][col] = new  queen(row, col, 2, 10);
+                  board[row][col].setIcon(imageArray[9]);
+               }
+               turn = !turn;
+            }
+         }
+      }
+   }
+
    public boolean BlackInCheck(int r, int c){
       for (int i = 0; i < 8; i++){
          for (int q = 0; q < 8; q++){
-            if (occupied[i][q] == 1){ // if piece is black
+            if (occupied[i][q] == 1){ //IF PIECE IS WHITE
                if (living[i][q].canCapture(r, c) == true && NoPieceBetween(i, q, r, c) == true)
                   return true;
             }
@@ -353,7 +332,7 @@ public class Chess extends JPanel {
    public boolean WhiteInCheck(int r, int c){
       for (int i = 0; i < 8; i++){
          for (int q = 0; q < 8; q++){
-            if (occupied[i][q] == 2){ // if piece is black
+            if (occupied[i][q] == 2){ //IF PIECE IS BLACK
                if (living[i][q].canCapture(r, c) == true && NoPieceBetween(i, q, r, c) == true)
                   return true;
             }
@@ -431,10 +410,7 @@ public class Chess extends JPanel {
       }
       
       return true;
-   }
-   
-   
-     
+   } 
    
    public void move(int row, int col, int rsel, int csel){
       living[rsel][csel].setLocation(row, col);
