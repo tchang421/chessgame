@@ -189,63 +189,32 @@ public class Chess extends JPanel {
             if (living[rsel][csel].getType() <= 2)
                movePawn(row, col);
 
-            else if (living[rsel][csel].getType() >= 3){ // NOT PAWN PIECES
+            else if (living[rsel][csel].getType() >= 3)
                movePiece(row, col);
-               // if (occupied[row][col] != occupied[rsel][csel] 
-               //       && living[rsel][csel].canMove(row, col)
-               //       && (row!=bkr || col!=bkc) && (row!=wkr || col!=wkc)){
-               //    pieces temp;
-               //    if (occupied[row][col] != 0) temp = living[row][col];
-               //    else temp = null;
-
-               //    move(row, col, rsel, csel);
-               //    if (WhiteInCheck(wkr, wkc) && turn || BlackInCheck(bkr, bkc) && !turn){
-               //       //RESET THE OLD SPACE
-               //       living[row][col].setLocation(rsel, csel);
-               //       living[rsel][csel] = living[row][col];
-               //       occupied[rsel][csel] = living[rsel][csel].getColor();
-               //       board[rsel][csel].setIcon(board[row][col].getIcon());
-               //       //RESET THE CAPTURED SPACE
-               //       if (temp == null){
-               //          living[row][col] = null;
-               //          occupied[row][col] = 0;
-               //          board[row][col].setIcon(null);
-               //       }
-               //       else{
-               //          living[row][col] = temp;
-               //          occupied[row][col] = temp.getColor();
-               //          board[row][col].setIcon(imageArray[temp.getType()-1]);
-               //       }
-               //    }
-               //    else  
-               //       turn = !turn;  
-               // }
-            }
             
             //////////////////////////////////////////////////////////////////
             //CHECKING FOR CHECKMATE OR STALEMATE
             //////////////////////////////////////////////////////////////////
-            if (BlackInCheck(bkr, bkc)){
+            if (!turn && BlackInCheck(bkr, bkc)){
                if (board[bkr][bkc].getBackground() != Color.red)
-               previous2 = board[bkr][bkc].getBackground();
+                  previous2 = board[bkr][bkc].getBackground();
                board[bkr][bkc].setBackground(Color.red);
-               bcheckr =bkr;
+               bcheckr = bkr;
                bcheckc = bkc;
             }
             else{
                if (board[bcheckr][bcheckc].getBackground() == Color.red)
-               board[bcheckr][bcheckc].setBackground(previous2);
+                  board[bcheckr][bcheckc].setBackground(previous2);
             }
             
-            if (WhiteInCheck(wkr, wkc)){
-        
+            if (turn && WhiteInCheck(wkr, wkc)){
                if (board[wkr][wkc].getBackground() != Color.red)
-               previous3 = board[wkr][wkc].getBackground();
+                  previous3 = board[wkr][wkc].getBackground();
                board[wkr][wkc].setBackground(Color.red);
                wcheckr = wkr;
                wcheckc = wkc;
             }
-            else {
+            else{
                if (board[wcheckr][wcheckc].getBackground() == Color.red)
                   board[wcheckr][wcheckc].setBackground(previous3);
             }   
@@ -326,21 +295,21 @@ public class Chess extends JPanel {
          if (occupied[row][col] != 0) temp = living[row][col];
          else temp = null;
          
-         if (living[rsel][csel].getType() == 11){
+         if (rsel == wkr && csel == wkc){
             wkr = row; 
             wkc = col;
          }
-         if (living[rsel][csel].getType() == 11){
+         if (rsel == bkr && csel == bkc){
             bkr = row;
             bkc = col;
          }
          move(row, col, rsel, csel);
          if (WhiteInCheck(wkr, wkc) && turn || BlackInCheck(bkr, bkc) && !turn){
-            if (living[rsel][csel].getType() == 11){
+            if (rsel == wkr && csel == wkc){
                wkr = rsel; 
                wkc = csel;
             }
-            if (living[rsel][csel].getType() == 11){
+            if (rsel == bkr && csel == bkc){
                bkr = rsel;
                bkc = csel;
             }
