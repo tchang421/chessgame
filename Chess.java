@@ -221,18 +221,10 @@ public class Chess extends JPanel {
             
          }
       
-         if (CheckOrStaleMate(turn) != 0){
-            for (int Tae = 0; Tae < 8; Tae ++){
-               for (int TAE = 0; TAE < 8; TAE ++){
-                  board[Tae][TAE].setEnabled(false);
-               }
-            }
-         }
-         
-         if (InsMat()){
-            for (int Tae = 0; Tae < 8; Tae ++){
-               for (int TAE = 0; TAE < 8; TAE ++){
-                  board[Tae][TAE].setEnabled(false);
+         if (gameOver(turn) || insufficientMat()){
+            for (int r = 0; r < 8; r++){
+               for (int c = 0; c < 8; c++){
+                  board[r][c].setEnabled(false);
                }
             }
          }
@@ -305,11 +297,11 @@ public class Chess extends JPanel {
          }
          move(row, col, rsel, csel);
          if (WhiteInCheck(wkr, wkc) && turn || BlackInCheck(bkr, bkc) && !turn){
-            if (rsel == wkr && csel == wkc){
+            if (row == wkr && col == wkc){
                wkr = rsel; 
                wkc = csel;
             }
-            if (rsel == bkr && csel == bkc){
+            if (row == bkr && col == bkc){
                bkr = rsel;
                bkc = csel;
             }
@@ -630,11 +622,11 @@ public class Chess extends JPanel {
       return false;
    }
 
-   public int CheckOrStaleMate(boolean turn){
-      return 0;
+   public boolean gameOver(boolean turn){
+      return false;
    }
     
-   public boolean InsMat(){
+   public boolean insufficientMat(){
    int white = 0;
    int black = 0;
       for (int r = 0; r < 8; r ++)
