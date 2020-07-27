@@ -1,9 +1,7 @@
 import javax.swing.*;
 
-public class ChessDriver
-{
-   public static void main(String[]args)
-   {
+public class ChessDriver{
+      public static void main(String[]args){
       JFrame frame = new JFrame("Message Displayer");
       frame.setSize(800, 800);
       frame.setLocation(275, 200);
