@@ -188,8 +188,9 @@ public class Chess extends JPanel {
             
             if (living[rsel][csel].getType() <= 2)
                movePawn(row, col);
-
-            else if (living[rsel][csel].getType() >= 3)
+            else if (living[rsel][csel].getType() <= 4)
+               movePiece(row, col);
+            else if (living[rsel][csel].getType() >= 5 && noPieceBetween(row, col, rsel, csel))
                movePiece(row, col);
             
             //////////////////////////////////////////////////////////////////
@@ -329,7 +330,7 @@ public class Chess extends JPanel {
    public boolean inCheck(int r, int c, int color){
       for (int i = 0; i < 8; i++){
          for (int q = 0; q < 8; q++){
-            if (occupied[i][q] == color && living[i][q].canCapture(r, c) && NoPieceBetween(i, q, r, c))
+            if (occupied[i][q] == color && living[i][q].canCapture(r, c) && noPieceBetween(i, q, r, c))
                return true;
             
          }
@@ -337,10 +338,9 @@ public class Chess extends JPanel {
       return false;
    }
    
-   public boolean NoPieceBetween(int r, int c, int rsel, int csel){
+   public boolean noPieceBetween(int r, int c, int rsel, int csel){
       boolean between = false;
-
-      if (r == rsel){ // horizontal 
+      if (r == rsel){ //HORIZONTAL
          for (int i = 0; i < 8; i++){
             if (!between && (i == c || i == csel))
                between = true;
@@ -350,58 +350,30 @@ public class Chess extends JPanel {
                return false;
          }
       }
-      
-      else if (c == csel){ // vertical
-         if (r > rsel + 1){ //moves up
-            for (int i = rsel+1; i < r; i++){
-               if (occupied[i][c] != 0) return false;
-            }
+      else if (c == csel){ //VERTICAL 
+         for (int i = 0; i < 8; i++){
+            if (!between && (i == r || i == rsel))
+               between = true;
+            else if (between && (i == r || i == rsel))
+               return true;
+            else if (between && occupied[i][c] != 0)
+               return false;
          }
-         else{ //move rdown
-            for (int i = rsel-1; i > r; i--){
-               if (occupied[i][c] != 0) return false;
+      }  
+      else{ //DIAGONAL
+         int incR = 0, incC = 0, newR = r, newC = c;
+         if (r > rsel) incR = -1; else incR = 1;
+         if (c > csel) incC = -1; else incC = 1;
+
+         while (Math.abs(newR-rsel) != 0){
+            if (newR != r && occupied[newR][newC] != 0)
+               return false;
+            else{
+               newR = newR + incR;
+               newC = newC + incC;
             }
-         }
-      }
-      
-      else{ //diagonal
-         if (rsel+1 < r && csel -1 > c){ // up  and right
-            for (int i = r-1; i > rsel; i --){
-               for (int p = c+1; p < csel; p++){
-                  if (Math.abs(p - c) == Math.abs(i - r) && occupied[i][p] != 0)
-                     return false;
-               }
-            }
-         }
-         
-         else if (rsel+1 < r  && csel + 1 < c){ // up and left
-            for (int i = r-1; i > rsel; i --){
-               for (int p = c-1; p > csel; p--){
-                  if (Math.abs(p - csel) == Math.abs(i - rsel) && occupied[i][p] != 0)
-                     return false;
-               }
-            }
-         }
-         
-         else if (rsel-1 > r && csel -1 > c){ // down and right
-            for (int i = r + 1; i < rsel; i++){
-               for (int p = c +1; p < csel; p++){
-                  if (Math.abs(p - csel) == Math.abs(i - rsel) && occupied[i][p] != 0)
-                     return false;
-               }
-            }
-         }
-         
-         else{ // down and left
-            for (int i = r+1; i < rsel; i++){
-               for (int p = c-1; p > csel; p--){
-                  if (Math.abs(p - csel) == Math.abs(i - rsel) && occupied[i][p] != 0)
-                     return false;
-               }
-            }
-         }
-      }
-      
+         } 
+      }      
       return true;
    } 
    
@@ -420,7 +392,7 @@ public class Chess extends JPanel {
       for (int i = 0; i < 8; i++){
          for (int q = 0; q < 8; q++){
             if (occupied[i][q] == color && living[i][q].canCapture(r, c) == true 
-                                       && NoPieceBetween(i, q, r, c) == true)
+                                       && noPieceBetween(i, q, r, c) == true)
                count++; 
          }
       }
