@@ -338,16 +338,16 @@ public class Chess extends JPanel {
    }
    
    public boolean NoPieceBetween(int r, int c, int rsel, int csel){
+      boolean between = false;
+
       if (r == rsel){ // horizontal 
-         if (c > csel + 1){ //moves left
-            for (int i = csel+1; i < c; i++){
-               if (occupied[r][i] != 0) return false;
-            }
-         }
-         else{ //move right
-            for (int i = csel-1; i > c; i--){
-               if (occupied[r][i] != 0) return false;
-            }
+         for (int i = 0; i < 8; i++){
+            if (!between && (i == c || i == csel))
+               between = true;
+            else if (between && (i == c || i == csel))
+               return true;
+            else if (between && occupied[r][i] != 0)
+               return false;
          }
       }
       
@@ -499,8 +499,7 @@ public class Chess extends JPanel {
    }
     
    public boolean insufficientMat(){
-      int white = 0;
-      int black = 0;
+      int white = 0, black = 0;
       for (int r = 0; r < 8; r ++){
          for (int c = 0; c < 8; c ++){
             if (occupied[r][c] == 1 && living[r][c].getType() != 1 && living[r][c].getType() != 7 && living[r][c].getType() != 9 && living[r][c].getType() != 11)
@@ -527,31 +526,3 @@ public class Chess extends JPanel {
       }
    }
 }     
-
-
-
-
-
-
-
-//////////////////////////////////////////////////////////////////
-
-
-
-
-/* piece ID
-White Pawn 1
-Black Pawn 2
-White Knight 3
-Black knight 4
-White Bishop 5
-Black Bishop 6
-White Rook 7
-Black Rook 8
-White Queen 9
-Black Queen 10
-White King 11
-Black King 12
-*/
-
-
