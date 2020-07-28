@@ -315,9 +315,12 @@ public class Chess extends JPanel {
    ////////////////////////////////////////////////////////////////////////////////
    ////////////////////////////////////////////////////////////////////////////////
    public boolean inCheck(int r, int c, int color){
+      if (r < 0 || r > 7 || c < 0 || c > 7) return false;
       for (int i = 0; i < 8; i++){
          for (int q = 0; q < 8; q++){
-            if (occupied[i][q] == color && living[i][q].canCapture(r, c) && noPieceBetween(i, q, r, c))
+            if (occupied[i][q] == color && living[i][q].canCapture(r, c) &&
+                     ((living[i][q].getType() == 3 || living[i][q].getType() == 4) 
+                     || noPieceBetween(i, q, r, c)) )
                return true;  
          }
       }
@@ -328,9 +331,11 @@ public class Chess extends JPanel {
       int count = 0;
       for (int i = 0; i < 8; i++){
          for (int q = 0; q < 8; q++){
-            if (occupied[i][q] == color && living[i][q].canCapture(r, c) == true 
-                                       && noPieceBetween(i, q, r, c) == true)
-               count++; 
+            if (occupied[i][q] == color && living[i][q].canCapture(r, c) &&
+                     ((living[i][q].getType() == 3 || living[i][q].getType() == 4) 
+                     || noPieceBetween(i, q, r, c)) )
+               count++;
+            if (count == 2) return count; 
          }
       }
       return count;
@@ -403,11 +408,37 @@ public class Chess extends JPanel {
       return false;
    }
 
+   public boolean cantMove(int r, int c, int color){
+      if (inBounds(r+1, c+1) && occupied[r+1][c+1] == 0 && !inCheck(r, c, color) ||
+          inBounds(r+1, c) && occupied[r+1][c] == 0 && !inCheck(r, c, color) ||
+          inBounds(r+1, c-1) && occupied[r+1][c-1] == 0 && !inCheck(r, c, color) ||
+          inBounds(r, c+1) && occupied[r][c+1] == 0 && !inCheck(r, c, color) ||
+          inBounds(r, c-1) && occupied[r][c-1] == 0 && !inCheck(r, c, color) ||
+          inBounds(r-1, c-1) && occupied[r-1][c-1] == 0 && !inCheck(r, c, color) ||
+          inBounds(r-1, c) && occupied[r-1][c] == 0 && !inCheck(r, c, color) ||
+          inBounds(r-1, c+1) && occupied[r-1][c+1] == 0 && !inCheck(r, c, color))
+         return false;
+      return true;
+   }
+
+   public boolean inBounds(int r, int c){
+      if (r < 0 || r > 7 || c < 0 || c > 7) return false;
+      return true;
+   }
+
    public boolean gameOver(boolean turn){
       if (insufficientMat()) return true;
 
-      if (turn){//WHITE IN CHECKMATE
-         
+      else if (turn){//WHITE IN CHECKMATE
+         if (howManyChecking(wkr, wkc, 2) > 1){//MULTIPLE PIECES CHECKING
+            if (cantMove(wkr, wkc, 2))
+               return true;
+         }
+         else if (howManyChecking(wkr, wkc, 1) == 1){//SINGLE PIECE CHECK
+
+         }
+         else
+            return false;
 
       }
       return false;
