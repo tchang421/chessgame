@@ -10,9 +10,6 @@ wkr, wkc, bkr, bkc - color/king/row/column
 occupied[][] - array of ints (0: unoccupied, 1: whte piece, 2: black piece)
 living[][] - array of piece objects
 turn - true is white turn
-
-///////////////////////////////////////
-when dealing with colors - 1 is white, 2 is black
 */
 
 public class Chess extends JPanel {
@@ -26,76 +23,13 @@ public class Chess extends JPanel {
    Color previous, previous2, previous3;
    private pieces[][]living = new pieces[8][8]; // active pieces
    private boolean turn; // true - white
-   private boolean WIC, BIC, WKORM, BKORM;
    private JButton exit;
    private JPanel bigBoard;
-
-   public static void setBoard(int[][] oc, JButton[][] b){
-      for(int r = 0; r<8; r++){
-         for(int c = 0; c<8; c++){ 
-            // SETS THE BOARD OCCPUATION
-            if (r<2)
-               oc[r][c] = 2;
-            else if (r>5)
-               oc[r][c] = 1;
-            else 
-               oc[r][c] = 0;
-
-            // SETS THE COLOR OF THE BOARD
-            b[r][c] = new JButton();
-            if ((r+c)%2 == 0)
-               b[r][c].setBackground(Color.white);
-            else
-               b[r][c].setBackground(Color.gray);
-            b[r][c].setOpaque(true);
-            b[r][c].setBorderPainted(false); 
-         }
-      }
-   }
-
-   public static void setPieces(JButton[][]b, int[][]o, pieces[][]l, ImageIcon[]i){
-      //SETS THE OBJECT OF EACH PIECE
-      for (int r = 0; r < 8; r++){
-         for (int c = 0; c < 8; c++){
-            if (r == 2){
-               r = 6;
-               c = -1;
-               continue;
-            }
-            int isBlack = 1;
-            if (r == 7) isBlack = 0;
-
-            if (r == 1) //BLACK PAWN
-               l[r][c] = new pawn(r, c, o[r][c], 2);
-            else if (r == 6) //WHITE PAWN
-               l[r][c] = new pawn(r, c, o[r][c], 1);
-            else if (c == 0 || c == 7) //BLACK ROOK
-               l[r][c] = new rook(r, c, o[r][c], 7+isBlack);
-            else if (c == 1 || c == 6) //BLACK KNIGHT
-               l[r][c] = new knight(r, c, o[r][c], 3+isBlack);
-            else if (c == 2 || c == 5) //BLACK BISHOP
-               l[r][c] = new bishop(r, c, o[r][c], 5+isBlack);
-            else if (c == 4) //BLACK KING
-               l[r][c] = new king(r, c, o[r][c], 11+isBlack);
-            else  //BLACK QUEEN
-               l[r][c] = new queen(r, c, o[r][c], 9+isBlack);
-         }
-      }
-      //SETS THE IMAGE FOR THE BUTTON
-      for (int r = 0; r < 8; r++){
-         for (int c = 0; c < 8; c++){
-            if (l[r][c] != null)
-               b[r][c].setIcon(i[l[r][c].getType()-1]);
-         }
-      }
-   }
  
    public Chess(){ 
       setLayout(new BorderLayout());
       bigBoard = new JPanel();
       bigBoard.setLayout(new GridLayout(8, 8));
-      WKORM = false;
-      BKORM = false;
       bcheckc = 0;
       bcheckr = 0;
       wcheckc = 0;
@@ -104,8 +38,6 @@ public class Chess extends JPanel {
       selected = false;
       turn = true;
       
-      WIC = false;
-      BIC = false;
       exit = new JButton("exit");
       exit.addActionListener(new Exit());
       add(exit, BorderLayout.SOUTH);
@@ -153,12 +85,8 @@ public class Chess extends JPanel {
       public PieceSelected(int r, int c){
          row = r;
          col = c;
-      }
+      }  
 
-      //////////////////////////////////////////////////////
-      //ACTION LISTENER
-      /////////////////////////////////////////////////////
-         
       public void actionPerformed(ActionEvent PieceSelection){
          ///////////////////////////////////////////////////////////////////////
          //SELECTING A PIECE
@@ -194,7 +122,7 @@ public class Chess extends JPanel {
                movePiece(row, col);
             
             //////////////////////////////////////////////////////////////////
-            //CHECKING FOR CHECKMATE OR STALEMATE
+            //HIGHLIGHTING CHECKED KING'S SQUARE RED
             //////////////////////////////////////////////////////////////////
             if (!turn && inCheck(bkr, bkc, 1)){
                if (board[bkr][bkc].getBackground() != Color.red)
@@ -221,8 +149,7 @@ public class Chess extends JPanel {
             }   
             
          }
-      
-         if (gameOver(turn) || insufficientMat()){
+         if (gameOver(turn)){
             for (int r = 0; r < 8; r++){
                for (int c = 0; c < 8; c++){
                   board[r][c].setEnabled(false);
@@ -232,12 +159,12 @@ public class Chess extends JPanel {
       }
    }  
 
-   //////////////////////////////////////////////////////////////////////////////////
-   //////////////////////////////////////////////////////////////////////////////////
-   //HELPER METHODS
-   //////////////////////////////////////////////////////////////////////////////////
-   //////////////////////////////////////////////////////////////////////////////////
 
+   ////////////////////////////////////////////////////////////////////////////////
+   ////////////////////////////////////////////////////////////////////////////////
+   //MOVING MECHANIC HELPER METHODS
+   ////////////////////////////////////////////////////////////////////////////////
+   ////////////////////////////////////////////////////////////////////////////////
    public void movePawn(int row, int col){
       if (living[rsel][csel].getType() <= 2){ //PAWN
          if ((occupied[row][col] != occupied[rsel][csel] && occupied[row][col] != 0 
@@ -299,11 +226,11 @@ public class Chess extends JPanel {
          move(row, col, rsel, csel);
          if (inCheck(wkr, wkc, 2) && turn || inCheck(bkr, bkc, 1) && !turn){
             if (row == wkr && col == wkc){
-               wkr = rsel; 
+               wkr = rsel;   
                wkc = csel;
             }
             if (row == bkr && col == bkc){
-               bkr = rsel;
+               bkr = rsel;   
                bkc = csel;
             }
             //RESET THE OLD SPACE
@@ -325,17 +252,6 @@ public class Chess extends JPanel {
          }
          else turn = !turn;  
       }
-   }
-
-   public boolean inCheck(int r, int c, int color){
-      for (int i = 0; i < 8; i++){
-         for (int q = 0; q < 8; q++){
-            if (occupied[i][q] == color && living[i][q].canCapture(r, c) && noPieceBetween(i, q, r, c))
-               return true;
-            
-         }
-      }
-      return false;
    }
    
    public boolean noPieceBetween(int r, int c, int rsel, int csel){
@@ -385,6 +301,27 @@ public class Chess extends JPanel {
       occupied[row][col] = living[row][col].getColor();
       board[row][col].setIcon(board[rsel][csel].getIcon());
       board[rsel][csel].setIcon(null);
+   }
+   ////////////////////////////////////////////////////////////////////////////////
+   ////////////////////////////////////////////////////////////////////////////////
+   //MOVING MECHANIC HELPER METHODS
+   ////////////////////////////////////////////////////////////////////////////////
+   ////////////////////////////////////////////////////////////////////////////////
+
+
+   ////////////////////////////////////////////////////////////////////////////////
+   ////////////////////////////////////////////////////////////////////////////////
+   //CHECK, CHECKMATE, STALEMATE HELPER METHODS
+   ////////////////////////////////////////////////////////////////////////////////
+   ////////////////////////////////////////////////////////////////////////////////
+   public boolean inCheck(int r, int c, int color){
+      for (int i = 0; i < 8; i++){
+         for (int q = 0; q < 8; q++){
+            if (occupied[i][q] == color && living[i][q].canCapture(r, c) && noPieceBetween(i, q, r, c))
+               return true;  
+         }
+      }
+      return false;
    }
    
    public int howManyChecking(int r, int c, int color){
@@ -467,6 +404,12 @@ public class Chess extends JPanel {
    }
 
    public boolean gameOver(boolean turn){
+      if (insufficientMat()) return true;
+
+      if (turn){//WHITE IN CHECKMATE
+         
+
+      }
       return false;
    }
     
@@ -484,15 +427,89 @@ public class Chess extends JPanel {
          return true;
       return false;
    }
+   ////////////////////////////////////////////////////////////////////////////////
+   ////////////////////////////////////////////////////////////////////////////////
+   //CHECK, CHECKMATE, STALEMATE HELPER METHODS
+   ////////////////////////////////////////////////////////////////////////////////
+   ////////////////////////////////////////////////////////////////////////////////
+
+
+   ////////////////////////////////////////////////////////////////////////////////
+   ////////////////////////////////////////////////////////////////////////////////
+   //GAME AND BOARD SET UP HELPER METHODS
+   ////////////////////////////////////////////////////////////////////////////////
+   ////////////////////////////////////////////////////////////////////////////////
+   public static void setBoard(int[][] oc, JButton[][] b){
+      for(int r = 0; r<8; r++){
+         for(int c = 0; c<8; c++){ 
+            // SETS THE BOARD OCCPUATION
+            if (r<2)
+               oc[r][c] = 2;
+            else if (r>5)
+               oc[r][c] = 1;
+            else 
+               oc[r][c] = 0;
+
+            // SETS THE COLOR OF THE BOARD
+            b[r][c] = new JButton();
+            if ((r+c)%2 == 0)
+               b[r][c].setBackground(Color.white);
+            else
+               b[r][c].setBackground(Color.gray);
+            b[r][c].setOpaque(true);
+            b[r][c].setBorderPainted(false); 
+         }
+      }
+   }
+
+   public static void setPieces(JButton[][]b, int[][]o, pieces[][]l, ImageIcon[]i){
+      //SETS THE OBJECT OF EACH PIECE
+      for (int r = 0; r < 8; r++){
+         for (int c = 0; c < 8; c++){
+            if (r == 2){
+               r = 6;
+               c = -1;
+               continue;
+            }
+            int isBlack = 1;
+            if (r == 7) isBlack = 0;
+
+            if (r == 1) //BLACK PAWN
+               l[r][c] = new pawn(r, c, o[r][c], 2);
+            else if (r == 6) //WHITE PAWN
+               l[r][c] = new pawn(r, c, o[r][c], 1);
+            else if (c == 0 || c == 7) //BLACK ROOK
+               l[r][c] = new rook(r, c, o[r][c], 7+isBlack);
+            else if (c == 1 || c == 6) //BLACK KNIGHT
+               l[r][c] = new knight(r, c, o[r][c], 3+isBlack);
+            else if (c == 2 || c == 5) //BLACK BISHOP
+               l[r][c] = new bishop(r, c, o[r][c], 5+isBlack);
+            else if (c == 4) //BLACK KING
+               l[r][c] = new king(r, c, o[r][c], 11+isBlack);
+            else  //BLACK QUEEN
+               l[r][c] = new queen(r, c, o[r][c], 9+isBlack);
+         }
+      }
+      //SETS THE IMAGE FOR THE BUTTON
+      for (int r = 0; r < 8; r++){
+         for (int c = 0; c < 8; c++){
+            if (l[r][c] != null)
+               b[r][c].setIcon(i[l[r][c].getType()-1]);
+         }
+      }
+   }
+   ////////////////////////////////////////////////////////////////////////////////
+   ////////////////////////////////////////////////////////////////////////////////
+   //GAME AND BOARD SET UP HELPER METHODS
+   ////////////////////////////////////////////////////////////////////////////////
+   ////////////////////////////////////////////////////////////////////////////////
+
 
    private class Exit implements ActionListener{    
       public void actionPerformed(ActionEvent click){
          JOptionPane.showMessageDialog( new JOptionPane(),
-         "On my honor as a Woodson High School Student,\n"
-         + "I, TAE certify that I have neither given \n"
-         + "nor received unauthorized aid on this assignment, \n"
-         + "that I have cited my sources for authorized aid, and \n"
-         + "that this project was created on or after May 10, 2017.", "Honor Code",
+         "Thanks for playing,\n"
+         + "Tae Chang.", "Tae Chang",
          JOptionPane.INFORMATION_MESSAGE);
          System.exit(0);
       }
